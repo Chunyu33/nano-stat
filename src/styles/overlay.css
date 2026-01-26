@@ -1,0 +1,81 @@
+/* 悬浮监控面板样式 */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 悬浮面板容器 */
+.overlay-panel {
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 25, 32, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(55, 65, 81, 0.6);
+  border-radius: 6px;
+  padding: 8px 14px;
+  color: #f7fafc !important;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 水平布局（顶部/底部） */
+.overlay-horizontal {
+  flex-direction: row;
+  gap: 14px;
+}
+
+/* 垂直布局（左侧/右侧） */
+.overlay-vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 8px 12px;
+}
+
+/* 监控项 */
+.monitor-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.monitor-label {
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.monitor-value {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* 颜色类 */
+.text-cpu { color: #0ea5e9; }
+.text-gpu { color: #10b981; }
+.text-temp { color: #f59e0b; }
+.text-memory { color: #a855f7; }
+.text-network { color: #3b82f6; }
+.text-fps { color: #eab308; }

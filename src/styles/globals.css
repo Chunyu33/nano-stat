@@ -1,0 +1,170 @@
+/* 全局样式 - NanoStat 硬件监控应用 */
+@import "tailwindcss";
+
+/* 自定义 CSS 变量 - 深色主题（默认） */
+:root, [data-theme="dark"] {
+  /* 主色调 - 翠绿科技风 */
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-primary-light: #34d399;
+  
+  /* 背景色 */
+  --color-bg-main: #0f1419;
+  --color-bg-sidebar: #0a0e14;
+  --color-bg-card: #1a2332;
+  --color-bg-card-hover: #1e2a3d;
+  --color-bg-input: #0f1419;
+  
+  /* 边框色 */
+  --color-border: #2d3748;
+  --color-border-light: #4a5568;
+  
+  /* 文字色 */
+  --color-text-primary: #f7fafc;
+  --color-text-secondary: #a0aec0;
+  --color-text-muted: #718096;
+  
+  /* 状态色 */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+}
+
+/* 亮色主题 */
+[data-theme="light"] {
+  /* 主色调 */
+  --color-primary: #059669;
+  --color-primary-dark: #047857;
+  --color-primary-light: #10b981;
+  
+  /* 背景色 */
+  --color-bg-main: #f8fafc;
+  --color-bg-sidebar: #f1f5f9;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #f8fafc;
+  --color-bg-input: #e2e8f0;
+  
+  /* 边框色 */
+  --color-border: #cbd5e1;
+  --color-border-light: #94a3b8;
+  
+  /* 文字色 */
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  
+  /* 状态色 */
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
+}
+
+/* 基础样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* 窗口拖拽区域 */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* 卡片通用样式 */
+.card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card:hover {
+  border-color: var(--color-border-light);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 文字截断 */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+/* 图表容器 */
+.chart-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* 进度条动画 */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--color-primary);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--color-primary);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* 数值变化动画 */
+@keyframes value-change {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.value-animate {
+  animation: value-change 0.3s ease-out;
+}

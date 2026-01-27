@@ -150,7 +150,7 @@ export function AboutPage() {
       {/* 版权信息 */}
       <div style={{ textAlign: 'center', padding: '20px 0' }}>
         <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
-          © {new Date().getFullYear()} NanoStat. All rights reserved.
+          Copyright © {new Date().getFullYear()} NanoStat. All rights reserved.
         </p>
       </div>
     </div>

@@ -70,18 +70,37 @@ export function NetworkCard({ network }: NetworkCardProps) {
         </div>
       </div>
 
-      {/* 主要网络接口 */}
+      {/* 网络接口列表 - 固定高度可滚动 */}
       {network.interfaces.length > 0 && (
-        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '8px 10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span className="text-xs text-gray-400 truncate" style={{ maxWidth: '80px' }} title={network.interfaces[0].name}>
-              {network.interfaces[0].name}
-            </span>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <span className="text-xs text-green-400 font-medium">↓ {formatRate(network.interfaces[0].rx_rate)}</span>
-              <span className="text-xs text-blue-400 font-medium">↑ {formatRate(network.interfaces[0].tx_rate)}</span>
+        <div 
+          style={{ 
+            maxHeight: '44px', 
+            overflowY: 'auto', 
+            overflowX: 'hidden'
+          }}
+          className="scrollbar-thin"
+        >
+          {network.interfaces.map((iface, index) => (
+            <div 
+              key={index} 
+              className="bg-[var(--color-bg-input)] rounded-lg" 
+              style={{ padding: '6px 10px', marginBottom: index < network.interfaces.length - 1 ? '6px' : 0 }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span 
+                  className="text-xs text-gray-400 truncate" 
+                  style={{ width: '80px', flexShrink: 0 }} 
+                  title={iface.name}
+                >
+                  {iface.name}
+                </span>
+                <div className="flex text-xs" style={{ width: '140px', justifyContent: 'flex-end' }}>
+                  <span className="text-green-400 font-medium" style={{ width: '70px', textAlign: 'right' }}>↓{formatRate(iface.rx_rate)}</span>
+                  <span className="text-blue-400 font-medium" style={{ width: '70px', textAlign: 'right' }}>↑{formatRate(iface.tx_rate)}</span>
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       )}
     </div>

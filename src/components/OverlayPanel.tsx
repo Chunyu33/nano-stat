@@ -13,6 +13,7 @@ const defaultSettings: MonitorSettings = {
   position: 'TopCenter',
   display_items: {
     cpu: true,
+    cpu_temp: false,
     gpu: true,
     gpu_temp: true,
     memory: true,
@@ -97,10 +98,20 @@ export function OverlayPanel() {
         </div>
       )}
 
+      {/* CPU 温度 */}
+      {settings.display_items.cpu_temp && (
+        <div className="monitor-item">
+          <span className="monitor-label">CPU温度</span>
+          <span className="monitor-value text-temp">
+            {stats?.cpu_temp?.toFixed(0) ?? '--'}°C
+          </span>
+        </div>
+      )}
+
       {/* GPU 温度 */}
       {settings.display_items.gpu_temp && (
         <div className="monitor-item">
-          <span className="monitor-label">温度</span>
+          <span className="monitor-label">GPU温度</span>
           <span className="monitor-value text-temp">
             {stats?.gpu_temp?.toFixed(0) ?? '--'}°C
           </span>

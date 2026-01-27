@@ -129,6 +129,8 @@ export interface NetworkStats {
 export interface RealtimeStats {
   /** CPU 使用率 (0-100) */
   cpu_usage: number;
+  /** CPU 温度 */
+  cpu_temp: number | null;
   /** GPU 使用率 (0-100) */
   gpu_usage: number;
   /** GPU 温度 */
@@ -148,6 +150,8 @@ export type MonitorPosition = 'TopCenter' | 'BottomCenter' | 'LeftCenter' | 'Rig
 export interface DisplayItems {
   /** 显示 CPU 使用率 */
   cpu: boolean;
+  /** 显示 CPU 温度 */
+  cpu_temp: boolean;
   /** 显示 GPU 使用率 */
   gpu: boolean;
   /** 显示 GPU 温度 */

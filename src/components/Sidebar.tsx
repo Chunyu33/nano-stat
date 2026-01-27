@@ -3,10 +3,10 @@
  * 提供主要功能区域的导航
  */
 
-import { Cpu, Monitor } from 'lucide-react';
+import { Cpu, Monitor, Info } from 'lucide-react';
 
 /** 导航项类型 */
-type NavItem = 'hardware' | 'monitor';
+type NavItem = 'hardware' | 'monitor' | 'about';
 
 interface SidebarProps {
   /** 当前激活的导航项 */
@@ -19,6 +19,7 @@ interface SidebarProps {
 const navItems: { id: NavItem; label: string; icon: typeof Cpu }[] = [
   { id: 'hardware', label: '硬件信息', icon: Cpu },
   { id: 'monitor', label: '游戏内监控', icon: Monitor },
+  { id: 'about', label: '关于', icon: Info },
 ];
 
 export function Sidebar({ activeItem, onNavigate }: SidebarProps) {
@@ -68,15 +69,6 @@ export function Sidebar({ activeItem, onNavigate }: SidebarProps) {
         </ul>
       </nav>
 
-      {/* 底部版权信息 */}
-      <div style={{ padding: '16px', borderTop: '1px solid var(--color-border)' }}>
-        <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', textAlign: 'center' }}>
-          © 2024 NanoStat
-        </p>
-        <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '4px' }}>
-          v1.0.0
-        </p>
-      </div>
     </aside>
   );
 }

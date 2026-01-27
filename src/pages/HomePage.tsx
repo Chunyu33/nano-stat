@@ -23,26 +23,30 @@ export function HomePage() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* 顶部状态栏 */}
-      <div className="flex items-center justify-between px-8 py-4 border-b border-[#1e2a3d]">
+      <div className="flex items-center justify-end px-6 py-3" style={{ borderBottom: '1px solid var(--color-border)' }}>
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold text-gray-100">硬件信息</h1>
           {loading && (
-            <span className="text-xs text-gray-500 flex items-center gap-1.5">
+            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }} className="flex items-center gap-1.5">
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
               加载中...
             </span>
           )}
-        </div>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex items-center gap-2" style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
             <Clock className="w-4 h-4" />
             <span>{currentTime}</span>
           </div>
           <button
             onClick={refresh}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white bg-[#1e2a3d] hover:bg-[#2d3748] rounded-lg transition-colors"
+            className="flex items-center gap-2 rounded-lg transition-all hover:opacity-80"
+            style={{ 
+              padding: '6px 14px', 
+              fontSize: '13px', 
+              color: 'var(--color-text-secondary)', 
+              backgroundColor: 'var(--color-bg-input)',
+              border: '1px solid var(--color-border)'
+            }}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             刷新
           </button>
         </div>
@@ -56,8 +60,8 @@ export function HomePage() {
       )}
 
       {/* 主内容区域 */}
-      <div className="flex-1 overflow-auto" style={{ padding: '20px 24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '20px' }}>
+      <div className="flex-1 overflow-auto" style={{ padding: '16px 20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '16px' }}>
           {/* 左侧：硬件概览 */}
           <div>
             <HardwareOverviewSection data={overview} />
@@ -85,7 +89,7 @@ export function HomePage() {
             </div>
 
             {/* 内存、磁盘、网络卡片 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
               {overview ? (
                 <>
                   <MemoryCard memory={overview.memory} />

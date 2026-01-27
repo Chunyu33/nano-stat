@@ -10,6 +10,7 @@ import { SettingsDialog } from './components/SettingsDialog';
 import { UpdateDialog, useUpdateChecker } from './components/UpdateDialog';
 import { HomePage } from './pages/HomePage';
 import { MonitorPage } from './pages/MonitorPage';
+import { AboutPage } from './pages/AboutPage';
 import { useMonitorSettings } from './hooks/useMonitorSettings';
 import { ThemeProvider } from './hooks/useTheme';
 import './styles/globals.css';
@@ -31,6 +32,8 @@ function App() {
         return <HomePage />;
       case 'monitor':
         return <MonitorPage />;
+      case 'about':
+        return <AboutPage />;
       default:
         return <HomePage />;
     }

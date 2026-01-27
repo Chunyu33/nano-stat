@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Minus, Square, X, Settings, Copy } from 'lucide-react';
+import { Minus, Square, X, Settings } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 interface TitleBarProps {
@@ -62,11 +62,9 @@ export function TitleBar({ onOpenSettings }: TitleBarProps) {
       }}
     >
       {/* 左侧 Logo 和标题 */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" style={{ marginLeft: '8px' }}>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
-            <Copy className="w-3.5 h-3.5 text-white" />
-          </div>
+          <img src="/icons/32x32.png" alt="NanoStat" className="w-6 h-6" />
           <span className="text-sm font-semibold text-emerald-400">NanoStat</span>
         </div>
         <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>v1.0.0</span>
@@ -82,7 +80,7 @@ export function TitleBar({ onOpenSettings }: TitleBarProps) {
         {/* 设置按钮 */}
         <button
           onClick={onOpenSettings}
-          className="w-8 h-8 flex items-center justify-center rounded transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-[var(--color-bg-input)]"
           style={{ color: 'var(--color-text-secondary)' }}
           title="设置"
         >
@@ -92,7 +90,7 @@ export function TitleBar({ onOpenSettings }: TitleBarProps) {
         {/* 窗口控制按钮 */}
         <button
           onClick={handleMinimize}
-          className="w-8 h-8 flex items-center justify-center rounded transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-[var(--color-bg-input)]"
           style={{ color: 'var(--color-text-secondary)' }}
           title="最小化"
         >
@@ -100,7 +98,7 @@ export function TitleBar({ onOpenSettings }: TitleBarProps) {
         </button>
         <button
           onClick={handleMaximize}
-          className="w-8 h-8 flex items-center justify-center rounded transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-[var(--color-bg-input)]"
           style={{ color: 'var(--color-text-secondary)' }}
           title={isMaximized ? '还原' : '最大化'}
         >
@@ -108,7 +106,7 @@ export function TitleBar({ onOpenSettings }: TitleBarProps) {
         </button>
         <button
           onClick={handleClose}
-          className="w-8 h-8 flex items-center justify-center rounded hover:bg-red-600 transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-red-500 hover:text-white"
           style={{ color: 'var(--color-text-secondary)' }}
           title="关闭"
         >

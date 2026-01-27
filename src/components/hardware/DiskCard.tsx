@@ -20,41 +20,33 @@ export function DiskCard({ disks }: DiskCardProps) {
           <HardDrive className="w-4 h-4 text-orange-400" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-gray-100">存储设备</h3>
-          <p className="text-xs text-gray-500">{disks.length} 个磁盘</p>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>存储设备</h3>
+          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>{disks.length} 个磁盘</p>
         </div>
       </div>
 
       {/* 磁盘列表 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '160px', overflowY: 'auto' }}>
-        {disks.map((disk, index) => (
-          <div key={index} className="bg-[#0f1419] rounded-lg" style={{ padding: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span className="text-xs font-medium text-gray-200">
-                  {disk.mount_point}
-                </span>
-                <span className="text-xs px-1.5 py-0.5 rounded bg-gray-800 text-gray-400">
-                  {disk.disk_type}
-                </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {disks.slice(0, 4).map((disk, index) => (
+          <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '4px', backgroundColor: 'var(--color-bg-input)', color: 'var(--color-text-primary)', fontWeight: 500, minWidth: '36px', textAlign: 'center' }}>
+              {disk.mount_point}
+            </span>
+            <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', backgroundColor: 'rgba(249, 115, 22, 0.2)', color: '#f97316' }}>
+              {disk.disk_type}
+            </span>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="h-2 bg-[var(--color-border)] rounded-full overflow-hidden" style={{ flex: 1 }}>
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    disk.usage > 90 ? 'bg-red-500' : disk.usage > 70 ? 'bg-orange-500' : 'bg-orange-400'
+                  }`}
+                  style={{ width: `${disk.usage}%` }}
+                />
               </div>
-              <span className="text-xs text-gray-400">
+              <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', minWidth: '90px', textAlign: 'right' }}>
                 {disk.used.toFixed(0)} / {disk.total.toFixed(0)} GB
               </span>
-            </div>
-            
-            {/* 使用率进度条 */}
-            <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${
-                  disk.usage > 90 
-                    ? 'bg-red-500' 
-                    : disk.usage > 70 
-                      ? 'bg-orange-500' 
-                      : 'bg-orange-400'
-                }`}
-                style={{ width: `${disk.usage}%` }}
-              />
             </div>
           </div>
         ))}

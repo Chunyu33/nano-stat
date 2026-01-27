@@ -13,6 +13,7 @@ const defaultSettings: MonitorSettings = {
   position: 'TopCenter',
   display_items: {
     cpu: true,
+    cpu_temp: false,
     gpu: true,
     gpu_temp: true,
     memory: true,

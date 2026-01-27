@@ -38,22 +38,22 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
           <Cpu className="w-4 h-4 text-emerald-400" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 className="text-sm font-semibold text-gray-100">处理器</h3>
-          <p className="text-xs text-gray-500 truncate">{cpu.name}</p>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>处理器</h3>
+          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }} className="truncate">{cpu.name}</p>
         </div>
       </div>
 
       {/* 主要信息区域 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
         {/* 使用率 */}
-        <div className="bg-[#0f1419] rounded-lg" style={{ padding: '12px' }}>
+        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span className="text-xs text-gray-400">占用</span>
+            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>占用</span>
             <span className="text-xl font-bold" style={{ color: usageColor }}>
               {cpu.usage.toFixed(0)}%
             </span>
           </div>
-          <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-[var(--color-border)] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{ width: `${cpu.usage}%`, backgroundColor: usageColor }}
@@ -62,14 +62,14 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
         </div>
 
         {/* 温度 */}
-        <div className="bg-[#0f1419] rounded-lg" style={{ padding: '12px' }}>
+        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span className="text-xs text-gray-400">温度</span>
+            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>温度</span>
             <span className="text-xl font-bold text-emerald-400">
               {cpu.temperature ? `${cpu.temperature.toFixed(0)}°C` : 'N/A'}
             </span>
           </div>
-          <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-[var(--color-border)] rounded-full overflow-hidden">
             <div
               className="h-full bg-emerald-500 rounded-full transition-all duration-300"
               style={{ width: `${cpu.temperature ? (cpu.temperature / 100) * 100 : 0}%` }}
@@ -79,7 +79,7 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
       </div>
 
       {/* 使用率图表 */}
-      <div className="bg-[#0f1419] rounded-lg" style={{ height: '80px', marginBottom: '14px', padding: '8px' }}>
+      <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ height: '80px', marginBottom: '14px', padding: '8px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
@@ -104,15 +104,15 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
       {/* 详细信息 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
         <div className="text-center">
-          <span className="text-gray-500 block text-xs">核心数</span>
-          <span className="text-gray-200 text-sm font-medium">{cpu.cores}</span>
+          <span style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-muted)' }}>核心数</span>
+          <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{cpu.cores}</span>
         </div>
         <div className="text-center">
-          <span className="text-gray-500 block text-xs">线程数</span>
-          <span className="text-gray-200 text-sm font-medium">{cpu.threads}</span>
+          <span style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-muted)' }}>线程数</span>
+          <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{cpu.threads}</span>
         </div>
         <div className="text-center">
-          <span className="text-gray-500 block text-xs">频率</span>
+          <span style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-muted)' }}>频率</span>
           <span className="text-emerald-400 text-sm font-medium">{cpu.frequency} MHz</span>
         </div>
       </div>

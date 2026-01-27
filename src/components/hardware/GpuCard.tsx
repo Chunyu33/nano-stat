@@ -30,7 +30,7 @@ export function GpuCard({ gpu, usageHistory }: GpuCardProps) {
             <MonitorPlay className="w-4 h-4 text-green-400" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-gray-100">显卡</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>显卡</h3>
             <p className="text-xs text-gray-500">未检测到 NVIDIA GPU</p>
           </div>
         </div>
@@ -52,22 +52,22 @@ export function GpuCard({ gpu, usageHistory }: GpuCardProps) {
           <MonitorPlay className="w-4 h-4 text-green-400" />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 className="text-sm font-semibold text-gray-100">显卡</h3>
-          <p className="text-xs text-gray-500 truncate">{gpu.name}</p>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>显卡</h3>
+          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }} className="truncate">{gpu.name}</p>
         </div>
       </div>
 
       {/* 主要信息区域 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
         {/* D3D 占用 */}
-        <div className="bg-[#0f1419] rounded-lg" style={{ padding: '12px' }}>
+        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span className="text-xs text-gray-400">D3D 占用</span>
+            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>D3D 占用</span>
             <span className="text-xl font-bold text-green-400">
               {gpu.usage.toFixed(0)}%
             </span>
           </div>
-          <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-[var(--color-border)] rounded-full overflow-hidden">
             <div
               className="h-full bg-green-500 rounded-full transition-all duration-300"
               style={{ width: `${gpu.usage}%` }}
@@ -76,14 +76,14 @@ export function GpuCard({ gpu, usageHistory }: GpuCardProps) {
         </div>
 
         {/* Total 占用 */}
-        <div className="bg-[#0f1419] rounded-lg" style={{ padding: '12px' }}>
+        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span className="text-xs text-gray-400">Total 占用</span>
+            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Total 占用</span>
             <span className="text-xl font-bold text-green-400">
               {gpu.usage.toFixed(0)}%
             </span>
           </div>
-          <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-[var(--color-border)] rounded-full overflow-hidden">
             <div
               className="h-full bg-green-500 rounded-full transition-all duration-300"
               style={{ width: `${gpu.usage}%` }}
@@ -93,7 +93,7 @@ export function GpuCard({ gpu, usageHistory }: GpuCardProps) {
       </div>
 
       {/* 使用率图表 */}
-      <div className="bg-[#0f1419] rounded-lg" style={{ height: '80px', marginBottom: '14px', padding: '8px' }}>
+      <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ height: '80px', marginBottom: '14px', padding: '8px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>

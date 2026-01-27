@@ -47,6 +47,7 @@ pub fn get_realtime_stats() -> RealtimeStats {
     
     RealtimeStats {
         cpu_usage: cpu::get_cpu_usage(&sys),
+        cpu_temp: cpu::get_cpu_temperature(&sys),
         gpu_usage: gpu::get_gpu_usage(),
         gpu_temp: gpu::get_gpu_temperature(),
         memory_usage: memory::get_memory_usage(&sys),

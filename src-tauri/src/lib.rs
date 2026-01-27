@@ -292,6 +292,19 @@ pub fn run() {
                 })
                 .build(app)?;
             
+            // 如果设置中启用了游戏内监控，自动显示悬浮窗口
+            let settings = MONITOR_SETTINGS.lock().unwrap().clone();
+            if settings.enabled {
+                let app_handle = app.handle().clone();
+                // 延迟一点启动，确保主窗口已经准备好
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_millis(500));
+                    tauri::async_runtime::block_on(async {
+                        let _ = show_overlay_window(app_handle).await;
+                    });
+                });
+            }
+            
             Ok(())
         })
         .run(tauri::generate_context!())

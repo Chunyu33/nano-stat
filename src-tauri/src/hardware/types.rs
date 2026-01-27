@@ -128,6 +128,8 @@ pub struct NetworkInterface {
 pub struct RealtimeStats {
     /// CPU 使用率 (0-100)
     pub cpu_usage: f32,
+    /// CPU 温度
+    pub cpu_temp: Option<f32>,
     /// GPU 使用率 (0-100)
     pub gpu_usage: f32,
     /// GPU 温度
@@ -190,6 +192,8 @@ impl Default for MonitorPosition {
 pub struct DisplayItems {
     /// 显示 CPU 使用率
     pub cpu: bool,
+    /// 显示 CPU 温度
+    pub cpu_temp: bool,
     /// 显示 GPU 使用率
     pub gpu: bool,
     /// 显示 GPU 温度
@@ -206,6 +210,7 @@ impl Default for DisplayItems {
     fn default() -> Self {
         DisplayItems {
             cpu: true,
+            cpu_temp: false,
             gpu: true,
             gpu_temp: true,
             memory: true,

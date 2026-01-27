@@ -48,3 +48,11 @@ pub fn get_cpu_info(sys: &System) -> CpuInfo {
 pub fn get_cpu_usage(sys: &System) -> f32 {
     sys.global_cpu_usage()
 }
+
+/// 获取 CPU 温度
+/// 注意：sysinfo 在 Windows 上不直接提供 CPU 温度，返回 None
+pub fn get_cpu_temperature(_sys: &System) -> Option<f32> {
+    // sysinfo 在 Windows 上不支持 CPU 温度读取
+    // 未来可以通过 WMI 或其他方式获取
+    None
+}

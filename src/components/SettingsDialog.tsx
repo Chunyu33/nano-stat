@@ -55,9 +55,20 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
     setLocalSettings(settings);
   }, [settings]);
 
-  // 处理开关变更
-  const handleEnabledChange = (enabled: boolean) => {
+  // 处理开关变更 - 立即显示/隐藏悬浮窗口
+  const handleEnabledChange = async (enabled: boolean) => {
     setLocalSettings(prev => ({ ...prev, enabled }));
+    try {
+      if (enabled) {
+        await showOverlayWindow();
+      } else {
+        await hideOverlayWindow();
+      }
+      // 同时更新后端设置
+      await updateMonitorSettings({ ...localSettings, enabled });
+    } catch (err) {
+      console.error('Failed to toggle overlay:', err);
+    }
   };
 
   // 处理位置变更 - 立即更新悬浮窗口位置
@@ -199,17 +210,19 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={handleTestOverlay}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg transition-colors border border-green-500/30"
+                className="flex-1 flex items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg transition-colors border border-green-500/30"
+                style={{ padding: '12px 16px' }}
               >
-                <Play className="w-3.5 h-3.5" />
-                <span className="text-xs font-medium">显示悬浮窗口</span>
+                <Play className="w-4 h-4" />
+                <span style={{ fontSize: '13px', fontWeight: 500 }}>显示悬浮窗口</span>
               </button>
               <button
                 onClick={handleCloseOverlay}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors border border-red-500/30"
+                className="flex-1 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors border border-red-500/30"
+                style={{ padding: '12px 16px' }}
               >
-                <Square className="w-3.5 h-3.5" />
-                <span className="text-xs font-medium">关闭悬浮窗口</span>
+                <Square className="w-4 h-4" />
+                <span style={{ fontSize: '13px', fontWeight: 500 }}>关闭悬浮窗口</span>
               </button>
             </div>
 
@@ -219,16 +232,17 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
                 <Eye className="w-3.5 h-3.5 text-emerald-400" />
                 <p style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)' }}>面板位置</p>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {positionOptions.map(option => (
                   <button
                     key={option.value}
                     onClick={() => handlePositionChange(option.value)}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                    className={`rounded-lg font-medium transition-all ${
                       localSettings.position === option.value
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                         : 'bg-[var(--color-bg-input)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-[var(--color-border-light)] hover:text-[var(--color-text-primary)]'
                     }`}
+                    style={{ padding: '10px 16px', fontSize: '13px' }}
                   >
                     {option.label}
                   </button>
@@ -239,9 +253,10 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
             {/* 显示项目 */}
             <div>
               <p style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '12px' }}>显示项目</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {[
                   { key: 'cpu' as const, label: 'CPU 使用率' },
+                  { key: 'cpu_temp' as const, label: 'CPU 温度' },
                   { key: 'gpu' as const, label: 'GPU 使用率' },
                   { key: 'gpu_temp' as const, label: 'GPU 温度' },
                   { key: 'memory' as const, label: '内存使用率' },
@@ -250,17 +265,17 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
                 ].map(item => (
                   <label
                     key={item.key}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors border"
-                    style={{ backgroundColor: 'var(--color-bg-input)', borderColor: 'var(--color-border)' }}
+                    className="flex items-center gap-3 rounded-lg cursor-pointer transition-colors border"
+                    style={{ padding: '10px 14px', backgroundColor: 'var(--color-bg-input)', borderColor: 'var(--color-border)' }}
                   >
                     <input
                       type="checkbox"
                       checked={localSettings.display_items[item.key]}
                       onChange={e => handleDisplayItemChange(item.key, e.target.checked)}
-                      className="w-3.5 h-3.5 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
+                      className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
                       style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-input)' }}
                     />
-                    <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{item.label}</span>
+                    <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>{item.label}</span>
                   </label>
                 ))}
               </div>
@@ -269,16 +284,17 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
             {/* 刷新间隔 */}
             <div>
               <p style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '12px' }}>刷新间隔</p>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
                 {refreshIntervalOptions.map(option => (
                   <button
                     key={option.value}
                     onClick={() => handleRefreshIntervalChange(option.value)}
-                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                    className={`flex-1 rounded-lg font-medium transition-all ${
                       localSettings.refresh_interval === option.value
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                         : 'bg-[var(--color-bg-input)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-[var(--color-border-light)] hover:text-[var(--color-text-primary)]'
                     }`}
+                    style={{ padding: '10px 16px', fontSize: '13px' }}
                   >
                     {option.label}
                   </button>
@@ -305,20 +321,21 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
             {/* 主题切换 */}
             <div>
               <p style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '12px' }}>主题</p>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
                 {themeOptions.map(option => {
                   const Icon = option.icon;
                   return (
                     <button
                       key={option.value}
                       onClick={() => setTheme(option.value)}
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex-1 flex items-center justify-center gap-2 rounded-lg font-medium transition-all ${
                         theme === option.value
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                           : 'bg-[var(--color-bg-input)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-[var(--color-border-light)] hover:text-[var(--color-text-primary)]'
                       }`}
+                      style={{ padding: '10px 16px', fontSize: '13px' }}
                     >
-                      <Icon className="w-3.5 h-3.5" />
+                      <Icon className="w-4 h-4" />
                       {option.label}
                     </button>
                   );

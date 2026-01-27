@@ -45,43 +45,45 @@ export function NetworkCard({ network }: NetworkCardProps) {
           <Wifi className="w-4 h-4 text-blue-400" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-gray-100">网络</h3>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>网络</h3>
           <p className="text-xs text-gray-500">{network.interfaces.length} 个接口</p>
         </div>
       </div>
 
       {/* 总流量统计 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
-        <div className="bg-[#0f1419] rounded-lg" style={{ padding: '10px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
             <div className="w-2 h-2 rounded-full bg-green-500" />
             <span className="text-xs text-gray-400">下载</span>
           </div>
-          <p className="text-base font-bold text-green-400">{formatRate(totalRxRate)}</p>
+          <p className="text-sm font-bold text-green-400">{formatRate(totalRxRate)}</p>
           <p className="text-xs text-gray-500">总计: {formatBytes(totalRx)}</p>
         </div>
-        <div className="bg-[#0f1419] rounded-lg" style={{ padding: '10px' }}>
+        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
             <div className="w-2 h-2 rounded-full bg-blue-500" />
             <span className="text-xs text-gray-400">上传</span>
           </div>
-          <p className="text-base font-bold text-blue-400">{formatRate(totalTxRate)}</p>
+          <p className="text-sm font-bold text-blue-400">{formatRate(totalTxRate)}</p>
           <p className="text-xs text-gray-500">总计: {formatBytes(totalTx)}</p>
         </div>
       </div>
 
-      {/* 网络接口列表 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '80px', overflowY: 'auto' }}>
-        {network.interfaces.slice(0, 3).map((iface, index) => (
-          <div key={index} className="bg-[#0f1419] rounded" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px' }}>
-            <span className="text-xs text-gray-400 truncate" style={{ maxWidth: '80px' }} title={iface.name}>{iface.name}</span>
+      {/* 主要网络接口 */}
+      {network.interfaces.length > 0 && (
+        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '8px 10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span className="text-xs text-gray-400 truncate" style={{ maxWidth: '80px' }} title={network.interfaces[0].name}>
+              {network.interfaces[0].name}
+            </span>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <span className="text-xs text-green-400 font-medium" title={`下载: ${formatRate(iface.rx_rate)}`}>↓ {formatRate(iface.rx_rate)}</span>
-              <span className="text-xs text-blue-400 font-medium" title={`上传: ${formatRate(iface.tx_rate)}`}>↑ {formatRate(iface.tx_rate)}</span>
+              <span className="text-xs text-green-400 font-medium">↓ {formatRate(network.interfaces[0].rx_rate)}</span>
+              <span className="text-xs text-blue-400 font-medium">↑ {formatRate(network.interfaces[0].tx_rate)}</span>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

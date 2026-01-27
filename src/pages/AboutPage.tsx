@@ -3,20 +3,19 @@
  * 显示应用信息、版权和开发者信息
  */
 
-import { Copy, Github, Heart, Mail, Globe } from 'lucide-react';
+import { Github, Heart, Mail, Globe } from 'lucide-react';
+import { useAppVersion } from '../hooks/useAppVersion';
 
 export function AboutPage() {
-  const appVersion = 'v1.0.0';
+  const appVersion = useAppVersion();
 
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', height: '100%', overflowY: 'auto' }}>
+    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', height: '100%', overflowY: 'auto', userSelect: 'none' }}>
       {/* 应用信息卡片 */}
       <div className="card" style={{ padding: '32px', marginBottom: '24px', textAlign: 'center' }}>
         {/* Logo */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
-            <Copy className="w-10 h-10 text-white" />
-          </div>
+          <img src="/icons/128x128.png" alt="NanoStat" className="w-20 h-20 rounded-2xl shadow-lg" />
         </div>
         
         {/* 应用名称 */}
@@ -72,7 +71,7 @@ export function AboutPage() {
               Evan Lau
             </h3>
             <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-              深漂码农。
+              一名佛系的深漂码农。
             </p>
           </div>
         </div>

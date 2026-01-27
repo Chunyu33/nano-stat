@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { Minus, Square, X, Settings } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { useAppVersion } from '../hooks/useAppVersion';
 
 interface TitleBarProps {
   /** 打开设置弹窗的回调 */
@@ -14,6 +15,7 @@ interface TitleBarProps {
 
 export function TitleBar({ onOpenSettings }: TitleBarProps) {
   const [isMaximized, setIsMaximized] = useState(false);
+  const appVersion = useAppVersion();
 
   // 最小化窗口
   const handleMinimize = async () => {
@@ -67,7 +69,7 @@ export function TitleBar({ onOpenSettings }: TitleBarProps) {
           <img src="/icons/32x32.png" alt="NanoStat" className="w-6 h-6" />
           <span className="text-sm font-semibold text-emerald-400">NanoStat</span>
         </div>
-        <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>v1.0.0</span>
+        <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>{appVersion}</span>
       </div>
 
       {/* 中间标题 */}

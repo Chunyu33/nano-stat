@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Cpu, MonitorPlay, MemoryStick, HardDrive, Monitor, ChevronDown, ChevronRight } from 'lucide-react';
+import { Cpu, MonitorPlay, MemoryStick, HardDrive, Monitor, ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import type { HardwareOverview } from '../../types/hardware';
 
 interface HardwareOverviewSectionProps {
@@ -12,8 +12,62 @@ interface HardwareOverviewSectionProps {
   data: HardwareOverview | null;
 }
 
+/** 生成硬件信息文本 */
+function generateHardwareInfoText(data: HardwareOverview): string {
+  const lines: string[] = [];
+  lines.push('=== 硬件信息 ===\n');
+  
+  // CPU
+  lines.push('【处理器】');
+  lines.push(`型号: ${data.cpu.name}`);
+  lines.push(`核心/线程: ${data.cpu.cores}核 / ${data.cpu.threads}线程`);
+  lines.push(`频率: ${data.cpu.frequency}MHz`);
+  lines.push(`使用率: ${data.cpu.usage.toFixed(1)}%`);
+  lines.push('');
+  
+  // GPU
+  if (data.gpu) {
+    lines.push('【显卡】');
+    lines.push(`型号: ${data.gpu.name}`);
+    lines.push(`显存: ${(data.gpu.vram_total / 1024).toFixed(0)}GB`);
+    if (data.gpu.driver_version) {
+      lines.push(`驱动版本: ${data.gpu.driver_version}`);
+    }
+    lines.push('');
+  }
+  
+  // 内存
+  lines.push('【内存】');
+  lines.push(`类型: ${data.memory.memory_type || 'DDR4'}`);
+  lines.push(`容量: ${(data.memory.total / 1024).toFixed(0)}GB`);
+  lines.push(`已用: ${(data.memory.used / 1024).toFixed(1)}GB (${data.memory.usage.toFixed(1)}%)`);
+  lines.push('');
+  
+  // 磁盘
+  lines.push('【存储设备】');
+  data.disks.forEach(disk => {
+    lines.push(`${disk.name || disk.mount_point} (${disk.disk_type}): ${disk.total.toFixed(0)}GB, 可用 ${disk.available.toFixed(0)}GB`);
+  });
+  
+  return lines.join('\n');
+}
+
 export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // 复制硬件信息
+  const handleCopyInfo = async () => {
+    if (!data) return;
+    try {
+      const text = generateHardwareInfoText(data);
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
 
   if (!data) {
     return (
@@ -29,21 +83,50 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
 
   return (
     <div className="card" style={{ padding: '16px' }}>
-      {/* 标题 - 可点击折叠 */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: isCollapsed ? '0' : '16px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-      >
-        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-          <Cpu className="w-4 h-4 text-emerald-400" />
-        </div>
-        <h2 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }} className="flex-1 text-left">硬件概览</h2>
-        {isCollapsed ? (
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-gray-400" />
-        )}
-      </button>
+      {/* 标题栏 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: isCollapsed ? '0' : '16px' }}>
+        {/* 折叠按钮 */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        >
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+            <Cpu className="w-4 h-4 text-emerald-400" />
+          </div>
+          <h2 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }} className="flex-1 text-left">硬件概览</h2>
+          {isCollapsed ? (
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          )}
+        </button>
+        
+        {/* 复制按钮 */}
+        <button
+          onClick={handleCopyInfo}
+          className="flex items-center gap-1.5 rounded-md transition-all hover:bg-[var(--color-bg-input)]"
+          style={{ 
+            padding: '6px 10px', 
+            fontSize: '11px', 
+            color: copied ? '#10b981' : 'var(--color-text-muted)',
+            border: '1px solid var(--color-border)',
+            background: 'none'
+          }}
+          title="复制硬件信息"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3 h-3" />
+              已复制
+            </>
+          ) : (
+            <>
+              <Copy className="w-3 h-3" />
+              复制
+            </>
+          )}
+        </button>
+      </div>
 
       {/* 折叠时显示简要信息 */}
       {isCollapsed && (

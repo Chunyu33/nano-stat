@@ -20,6 +20,8 @@ function App() {
   const [activeNav, setActiveNav] = useState<NavItem>('hardware');
   // 设置弹窗状态
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // 侧边栏收缩状态
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // 监控设置
   const { settings, saveSettings } = useMonitorSettings();
   // 更新检查
@@ -48,7 +50,12 @@ function App() {
       {/* 主内容区域 */}
       <div className="flex-1 flex overflow-hidden">
         {/* 侧边栏 */}
-        <Sidebar activeItem={activeNav} onNavigate={setActiveNav} />
+        <Sidebar 
+          activeItem={activeNav} 
+          onNavigate={setActiveNav} 
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
 
         {/* 页面内容 */}
         <main className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--color-bg-main)' }}>

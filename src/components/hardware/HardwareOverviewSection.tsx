@@ -131,7 +131,7 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
       {/* 内容区域 - 使用半折叠效果 */}
       <div style={{ 
         position: 'relative',
-        maxHeight: isCollapsed ? '120px' : '1000px',
+        maxHeight: isCollapsed ? '260px' : '1000px',
         overflow: 'hidden',
         transition: 'max-height 0.3s ease-in-out'
       }}>

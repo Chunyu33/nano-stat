@@ -61,7 +61,7 @@ export function HomePage() {
 
       {/* 主内容区域 */}
       <div className="flex-1 overflow-auto" style={{ padding: '16px 20px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '16px' }}>
           {/* 左侧：硬件概览 */}
           <div>
             <HardwareOverviewSection data={overview} />
@@ -88,13 +88,12 @@ export function HomePage() {
               )}
             </div>
 
-            {/* 内存、磁盘、网络卡片 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+            {/* 内存、磁盘卡片 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
               {overview ? (
                 <>
                   <MemoryCard memory={overview.memory} />
                   <DiskCard disks={overview.disks} />
-                  <NetworkCard network={overview.network} />
                 </>
               ) : (
                 <>
@@ -104,12 +103,18 @@ export function HomePage() {
                   <div className="card p-6 animate-pulse">
                     <div className="h-40 bg-gray-700/50 rounded-lg"></div>
                   </div>
-                  <div className="card p-6 animate-pulse">
-                    <div className="h-40 bg-gray-700/50 rounded-lg"></div>
-                  </div>
                 </>
               )}
             </div>
+
+            {/* 网络卡片 - 右侧整行 */}
+            {overview ? (
+              <NetworkCard network={overview.network} />
+            ) : (
+              <div className="card p-6 animate-pulse">
+                <div className="h-40 bg-gray-700/50 rounded-lg"></div>
+              </div>
+            )}
           </div>
         </div>
       </div>

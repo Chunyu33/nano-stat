@@ -38,7 +38,7 @@ export function NetworkCard({ network }: NetworkCardProps) {
   const totalTxRate = network.interfaces.reduce((sum, iface) => sum + iface.tx_rate, 0);
 
   return (
-    <div className="card" style={{ padding: '16px' }}>
+    <div className="card" style={{ padding: '16px', minHeight: '260px' }}>
       {/* 卡片标题 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
         <div className="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center">
@@ -74,7 +74,7 @@ export function NetworkCard({ network }: NetworkCardProps) {
       {network.interfaces.length > 0 && (
         <div 
           style={{ 
-            maxHeight: '44px', 
+            maxHeight: '140px', 
             overflowY: 'auto', 
             overflowX: 'hidden'
           }}

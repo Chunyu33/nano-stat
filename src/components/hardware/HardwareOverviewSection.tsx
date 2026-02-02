@@ -238,6 +238,9 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
           </div>
         </div>
 
+        {/* 占位 */}
+        <div style={{ height: '33px' }} />
+
         {/* 折叠时的渐变蒙版 */}
         {isCollapsed && (
           <div 

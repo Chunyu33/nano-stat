@@ -143,8 +143,8 @@ export function OverlayPanel() {
         </div>
       )}
 
-      {/* FPS：仅在前台检测到游戏（全屏窗口）时显示，避免非游戏状态下显示 "--" */}
-      {settings.display_items.fps && stats?.is_game_active && (
+      {/* FPS：始终显示（真实帧率采集尚未接入，暂显示 "--"） */}
+      {settings.display_items.fps && (
         <div className="monitor-item">
           <span className="monitor-label">FPS</span>
           <span className="monitor-value text-fps">--</span>

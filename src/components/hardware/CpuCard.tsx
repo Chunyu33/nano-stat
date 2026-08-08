@@ -3,8 +3,10 @@
  * 展示 CPU 详细信息和使用率图表
  */
 
-import { Cpu } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Cpu, Info } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts';
+import { isLhmDriverMissing } from '../../api/hardware';
 import type { CpuInfo } from '../../types/hardware';
 
 interface CpuCardProps {
@@ -15,6 +17,13 @@ interface CpuCardProps {
 }
 
 export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
+  // PawnIO 驱动是否缺失（用于温度不可用时提示引导安装）
+  const [driverMissing, setDriverMissing] = useState(false);
+
+  useEffect(() => {
+    isLhmDriverMissing().then(setDriverMissing).catch(() => {});
+  }, []);
+
   // 将历史数据转换为图表格式
   const chartData = usageHistory.map((value, index) => ({
     index,
@@ -75,6 +84,16 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
               style={{ width: `${cpu.temperature ? (cpu.temperature / 100) * 100 : 0}%` }}
             />
           </div>
+          {/* 驱动缺失提示（温度不可用时引导） */}
+          {!cpu.temperature && driverMissing && (
+            <div className="flex items-start gap-1.5 mt-2" style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
+              <Info className="w-3 h-3 flex-shrink-0 mt-0.5" />
+              <span>
+                安装 <a href="https://pawnio.eu" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline">PawnIO 驱动</a>
+                （需管理员）后可读取 CPU 温度
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

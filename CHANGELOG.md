@@ -15,9 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Availability depends on motherboard/BIOS support — laptops and some boards expose a thermal zone,
   while many desktops (e.g. CPUs without iGPU) report nothing and fall back to `N/A`.
   Results are cached (5s on success, 60s on failure) to avoid repeated slow WMI queries.
+- **LibreHardwareMonitor (LHM) bridge** — a native (NativeAOT, no .NET runtime needed) sidecar
+  process reads CPU/GPU/motherboard temperatures via the PawnIO kernel driver (MSR access).
+  Driver-optional design: if PawnIO is installed (run as admin) full CPU/motherboard temps are
+  reported; otherwise it gracefully falls back to WMI → `N/A`, and the CPU card shows an
+  install-guide hint. The bridge exits automatically when the parent process closes (stdin EOF).
 - **Foreground game detection** (`is_game_active` in realtime stats): the overlay now checks whether a
-  fullscreen window is in the foreground and only renders the FPS item while a game is active,
-  instead of showing a placeholder `--` at all times.
+  fullscreen window is in the foreground (kept for future real FPS capture; FPS row stays visible).
 - **Settings change events**: the Rust backend now emits a `settings-changed` event when settings are
   saved, so the overlay updates instantly instead of polling every second.
 

@@ -172,7 +172,12 @@ pub fn get_gpu_usage() -> f32 {
 
 /// 获取当前 GPU 温度
 pub fn get_gpu_temperature() -> Option<f32> {
-    // 只有 NVIDIA 可以通过 NVML 获取温度
+    // 优先 LHM（支持 NVIDIA/AMD/Intel 全品牌，含 NVML 不可用时）
+    if let Some(temp) = super::lhm::get_gpu_temp() {
+        return Some(temp);
+    }
+    
+    // 回退到 NVML（只有 NVIDIA 可以通过 NVML 获取温度）
     let nvml_guard = NVML.lock().ok()?;
     let nvml = nvml_guard.as_ref()?;
     let device = nvml.device_by_index(0).ok()?;

@@ -73,6 +73,12 @@ fn get_realtime_stats() -> RealtimeStats {
     hardware::get_realtime_stats()
 }
 
+/// 检查 LHM 温度采集所需的 PawnIO 驱动是否缺失（供 UI 提示引导安装）
+#[tauri::command]
+fn is_lhm_driver_missing() -> bool {
+    hardware::lhm::is_driver_missing()
+}
+
 /// 获取当前监控设置
 #[tauri::command]
 fn get_monitor_settings() -> MonitorSettings {
@@ -247,6 +253,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_hardware_overview,
             get_realtime_stats,
+            is_lhm_driver_missing,
             get_monitor_settings,
             update_monitor_settings,
             show_overlay_window,
@@ -254,6 +261,9 @@ pub fn run() {
             update_overlay_position_cmd,
         ])
         .setup(|app| {
+            // 启动 LHM 温度采集桥接进程（懒加载；驱动可选，未安装时自动回退 WMI）
+            hardware::lhm::ensure_bridge(app.handle());
+            
             // 创建系统托盘
             use tauri::tray::{TrayIconBuilder, MouseButton, MouseButtonState};
             use tauri::menu::{MenuBuilder, MenuItemBuilder};

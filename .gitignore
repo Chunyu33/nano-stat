@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# .NET build artifacts (lhm-bridge)
+src-tauri/lhm-bridge/bin/
+src-tauri/lhm-bridge/obj/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

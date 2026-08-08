@@ -4,6 +4,7 @@
 
 use sysinfo::{System, Components};
 use super::types::CpuInfo;
+use super::lhm;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use once_cell::sync::Lazy;
@@ -73,12 +74,22 @@ pub fn get_cpu_usage(sys: &System) -> f32 {
 
 /// 获取 CPU 温度
 /// 
-/// 通过 WMI (MSAcpi_ThermalZoneTemperature) 获取，不同主板/笔记本支持情况不同：
-/// - 部分笔记本/主板可以读到（热区温度）
-/// - 台式机（尤其无核显 CPU）通常读不到，返回 None
-/// 
-/// 带 5 秒缓存，避免每次实时刷新都触发 WMI 查询
+/// 优先级：
+/// 1. LHM (LibreHardwareMonitor) —— 需安装 PawnIO 驱动，最准确（含台式机 MSR）
+/// 2. WMI (MSAcpi_ThermalZoneTemperature) —— 无驱动依赖，部分笔记本/主板可读
+/// 3. None —— 均不可用时返回空（UI 显示 N/A）
 pub fn get_cpu_temperature(_sys: &System) -> Option<f32> {
+    // 1. 优先 LHM（驱动已安装时数据最可靠）
+    if let Some(temp) = lhm::get_cpu_temp() {
+        return Some(temp);
+    }
+    
+    // 2. WMI 兜底（带缓存）
+    get_wmi_temperature()
+}
+
+/// WMI 温度采集（带缓存：成功 5 秒、失败 60 秒，避免频繁触发慢查询）
+fn get_wmi_temperature() -> Option<f32> {
     // 检查缓存是否仍然有效
     {
         let cache = TEMP_CACHE.lock().ok()?;

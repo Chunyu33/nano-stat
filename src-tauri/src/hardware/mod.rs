@@ -13,6 +13,7 @@ pub mod memory;
 pub mod disk;
 pub mod network;
 pub mod game;
+pub mod lhm;
 pub mod types;
 
 use types::*;

@@ -23,6 +23,14 @@ export async function getRealtimeStats(): Promise<RealtimeStats> {
 }
 
 /**
+ * 检查 LHM 温度采集所需的 PawnIO 驱动是否缺失
+ * @returns 驱动缺失时返回 true（UI 可提示引导安装）
+ */
+export async function isLhmDriverMissing(): Promise<boolean> {
+  return await invoke<boolean>('is_lhm_driver_missing');
+}
+
+/**
  * 获取监控设置
  * @returns 当前监控设置
  */

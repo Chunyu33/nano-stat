@@ -9,7 +9,24 @@ import { CpuCard, GpuCard, MemoryCard, DiskCard, NetworkCard } from '../componen
 import { Clock, RefreshCw } from 'lucide-react';
 
 export function HomePage() {
-  const { overview, cpuHistory, gpuHistory, loading, error, refresh } = useHardwareData(1000);
+  const { overview, realtime, cpuHistory, gpuHistory, loading, error, refresh } = useHardwareData(1000);
+
+  // 概览中的静态信息 + 实时的使用率/温度（overview 只低频刷新，使用率须用实时数据）
+  const liveCpu = overview
+    ? {
+        ...overview.cpu,
+        usage: realtime?.cpu_usage ?? overview.cpu.usage,
+        temperature: realtime?.cpu_temp ?? overview.cpu.temperature,
+      }
+    : null;
+
+  const liveGpu = overview?.gpu
+    ? {
+        ...overview.gpu,
+        usage: realtime?.gpu_usage ?? overview.gpu.usage,
+        temperature: realtime?.gpu_temp ?? overview.gpu.temperature,
+      }
+    : null;
 
   // 获取当前时间
   const currentTime = new Date().toLocaleString('zh-CN', {
@@ -73,8 +90,8 @@ export function HomePage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               {overview ? (
                 <>
-                  <CpuCard cpu={overview.cpu} usageHistory={cpuHistory} />
-                  <GpuCard gpu={overview.gpu} usageHistory={gpuHistory} />
+                  <CpuCard cpu={liveCpu!} usageHistory={cpuHistory} />
+                  <GpuCard gpu={liveGpu} usageHistory={gpuHistory} />
                 </>
               ) : (
                 <>

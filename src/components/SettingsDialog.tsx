@@ -3,7 +3,7 @@
  * 提供游戏内监控的配置选项
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Monitor, Settings2, Eye, Play, Square, Sun, Moon, Laptop } from 'lucide-react';
 import type { MonitorSettings, MonitorPosition, DisplayItems } from '../types/hardware';
@@ -49,15 +49,25 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
   const [localSettings, setLocalSettings] = useState<MonitorSettings>(settings);
   // 主题
   const { theme, setTheme } = useTheme();
+  // ref 同步最新设置，避免异步回调中使用过期的闭包值
+  const settingsRef = useRef(localSettings);
 
   // 当外部设置变化时同步
   useEffect(() => {
     setLocalSettings(settings);
+    settingsRef.current = settings;
   }, [settings]);
+
+  // 更新本地设置并同步 ref（保证后续异步操作读到最新值）
+  const updateLocalSettings = (next: MonitorSettings) => {
+    setLocalSettings(next);
+    settingsRef.current = next;
+  };
 
   // 处理开关变更 - 立即显示/隐藏悬浮窗口
   const handleEnabledChange = async (enabled: boolean) => {
-    setLocalSettings(prev => ({ ...prev, enabled }));
+    const next = { ...settingsRef.current, enabled };
+    updateLocalSettings(next);
     try {
       if (enabled) {
         await showOverlayWindow();
@@ -65,7 +75,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
         await hideOverlayWindow();
       }
       // 同时更新后端设置
-      await updateMonitorSettings({ ...localSettings, enabled });
+      await updateMonitorSettings(next);
     } catch (err) {
       console.error('Failed to toggle overlay:', err);
     }
@@ -73,12 +83,13 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
 
   // 处理位置变更 - 立即更新悬浮窗口位置
   const handlePositionChange = async (position: MonitorPosition) => {
-    setLocalSettings(prev => ({ ...prev, position }));
+    const next = { ...settingsRef.current, position };
+    updateLocalSettings(next);
     // 立即更新悬浮窗口位置
     try {
       await updateOverlayPosition(position);
       // 同时更新后端设置
-      await updateMonitorSettings({ ...localSettings, position });
+      await updateMonitorSettings(next);
     } catch (err) {
       console.error('Failed to update overlay position:', err);
     }
@@ -86,20 +97,20 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
 
   // 处理显示项变更
   const handleDisplayItemChange = (key: keyof DisplayItems, value: boolean) => {
-    setLocalSettings(prev => ({
-      ...prev,
-      display_items: { ...prev.display_items, [key]: value },
-    }));
+    updateLocalSettings({
+      ...settingsRef.current,
+      display_items: { ...settingsRef.current.display_items, [key]: value },
+    });
   };
 
   // 处理刷新间隔变更
   const handleRefreshIntervalChange = (interval: number) => {
-    setLocalSettings(prev => ({ ...prev, refresh_interval: interval }));
+    updateLocalSettings({ ...settingsRef.current, refresh_interval: interval });
   };
 
   // 处理透明度变更
   const handleOpacityChange = (opacity: number) => {
-    setLocalSettings(prev => ({ ...prev, opacity }));
+    updateLocalSettings({ ...settingsRef.current, opacity });
   };
 
   // 保存设置

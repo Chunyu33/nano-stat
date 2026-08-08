@@ -139,6 +139,8 @@ export interface RealtimeStats {
   memory_usage: number;
   /** 网络统计 */
   network_stats: NetworkStats;
+  /** 前台是否检测到游戏（全屏窗口） */
+  is_game_active: boolean;
   /** 时间戳 */
   timestamp: number;
 }

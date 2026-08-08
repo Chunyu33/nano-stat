@@ -81,13 +81,21 @@ fn get_monitor_settings() -> MonitorSettings {
 
 /// 更新监控设置
 #[tauri::command]
-fn update_monitor_settings(settings: MonitorSettings) -> Result<(), String> {
+async fn update_monitor_settings(
+    app: tauri::AppHandle,
+    settings: MonitorSettings,
+) -> Result<(), String> {
     let mut current = MONITOR_SETTINGS.lock()
         .map_err(|e| format!("Failed to lock settings: {}", e))?;
     *current = settings.clone();
     
     // 保存到文件
     save_settings_to_file(&settings)?;
+    
+    // 通知悬浮窗口设置已变更（前端监听后更新显示）
+    drop(current);
+    use tauri::Emitter;
+    let _ = app.emit("settings-changed", &settings);
     
     Ok(())
 }

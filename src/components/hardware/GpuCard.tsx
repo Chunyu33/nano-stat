@@ -31,11 +31,11 @@ export function GpuCard({ gpu, usageHistory }: GpuCardProps) {
           </div>
           <div>
             <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>显卡</h3>
-            <p className="text-xs text-gray-500">未检测到 NVIDIA GPU</p>
+            <p className="text-xs text-gray-500">未检测到可用 GPU</p>
           </div>
         </div>
         <div className="text-center py-8 text-gray-500 text-sm">
-          暂不支持非 NVIDIA 显卡
+          未检测到显卡，请检查驱动程序是否正常安装
         </div>
       </div>
     );

@@ -138,6 +138,8 @@ pub struct RealtimeStats {
     pub memory_usage: f32,
     /// 网络统计
     pub network_stats: NetworkStats,
+    /// 前台是否检测到游戏（全屏窗口）
+    pub is_game_active: bool,
     /// 时间戳
     pub timestamp: i64,
 }

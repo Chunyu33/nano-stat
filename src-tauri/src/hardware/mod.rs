@@ -12,6 +12,7 @@ pub mod gpu;
 pub mod memory;
 pub mod disk;
 pub mod network;
+pub mod game;
 pub mod types;
 
 use types::*;
@@ -43,7 +44,11 @@ pub fn get_hardware_overview() -> HardwareOverview {
 /// 获取实时监控数据（用于游戏内监控面板）
 pub fn get_realtime_stats() -> RealtimeStats {
     let mut sys = SYSTEM.lock().unwrap();
-    sys.refresh_all();
+    
+    // 实时监控只关心 CPU、内存的使用率，避免 refresh_all 的全量开销
+    // （磁盘、进程等静态数据由 get_hardware_overview 负责）
+    sys.refresh_cpu_usage();
+    sys.refresh_memory();
     
     RealtimeStats {
         cpu_usage: cpu::get_cpu_usage(&sys),
@@ -52,6 +57,7 @@ pub fn get_realtime_stats() -> RealtimeStats {
         gpu_temp: gpu::get_gpu_temperature(),
         memory_usage: memory::get_memory_usage(&sys),
         network_stats: network::get_network_stats(&sys),
+        is_game_active: game::is_game_active(),
         timestamp: chrono::Utc::now().timestamp_millis(),
     }
 }

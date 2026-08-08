@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Download, Sparkles } from 'lucide-react';
+import { getVersion } from '@tauri-apps/api/app';
 
 interface UpdateInfo {
   version: string;
@@ -24,6 +25,12 @@ interface UpdateDialogProps {
 
 export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogProps) {
   const [downloading, setDownloading] = useState(false);
+  const [currentVersion, setCurrentVersion] = useState('1.0.0');
+
+  // 获取当前版本号（动态读取，避免硬编码不同步）
+  useEffect(() => {
+    getVersion().then(v => setCurrentVersion(v)).catch(() => {});
+  }, []);
 
   const handleDownload = () => {
     if (updateInfo?.downloadUrl) {
@@ -74,7 +81,7 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-500 mb-1">当前版本</p>
-                <p className="text-sm text-gray-400">v1.0.0</p>
+                <p className="text-sm text-gray-400">v{currentVersion}</p>
               </div>
             </div>
 
@@ -135,6 +142,8 @@ export function useUpdateChecker() {
 
   const checkForUpdates = async () => {
     try {
+      // 获取当前应用版本（与 tauri.conf.json 保持一致，避免硬编码不同步）
+      const currentVersion = await getVersion();
       // 这里可以替换为实际的更新检查 API
       // 示例：从 GitHub Releases 获取最新版本
       const response = await fetch(
@@ -145,7 +154,6 @@ export function useUpdateChecker() {
       if (response.ok) {
         const data = await response.json();
         const latestVersion = data.tag_name?.replace('v', '') || '';
-        const currentVersion = '1.0.0';
         
         // 简单的版本比较
         if (latestVersion && latestVersion !== currentVersion) {

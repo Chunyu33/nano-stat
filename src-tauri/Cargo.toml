@@ -1,6 +1,6 @@
 [package]
 name = "tauri-app"
-version = "0.1.0"
+version = "1.1.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -34,6 +34,11 @@ tokio = { version = "1", features = ["full"] }
 nvml-wrapper = "0.10"
 # Windows WMI 支持 (用于 AMD/Intel 集显)
 wmi = "0.14"
+# Windows API（前台窗口检测等）
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+] }
 # 时间处理
 chrono = "0.4"
 # 延迟初始化

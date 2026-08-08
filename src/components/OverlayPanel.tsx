@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import type { RealtimeStats, MonitorSettings } from '../types/hardware';
 
 /** 默认设置 */
@@ -28,7 +29,7 @@ export function OverlayPanel() {
   const [stats, setStats] = useState<RealtimeStats | null>(null);
   const [settings, setSettings] = useState<MonitorSettings>(defaultSettings);
 
-  // 加载设置并定时刷新
+  // 加载设置并监听设置变更事件（替代原来的每秒轮询）
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -40,9 +41,13 @@ export function OverlayPanel() {
     };
     loadSettings();
     
-    // 每秒检查设置变化（用于响应位置切换）
-    const settingsInterval = setInterval(loadSettings, 1000);
-    return () => clearInterval(settingsInterval);
+    // 监听主窗口设置变更事件，实时响应（位置切换、显示项调整等）
+    const unlistenPromise = listen<MonitorSettings>('settings-changed', (event) => {
+      setSettings(event.payload);
+    });
+    return () => {
+      unlistenPromise.then(unlisten => unlisten()).catch(() => {});
+    };
   }, []);
 
   // 定时获取实时数据
@@ -138,8 +143,8 @@ export function OverlayPanel() {
         </div>
       )}
 
-      {/* FPS（预留） */}
-      {settings.display_items.fps && (
+      {/* FPS：仅在前台检测到游戏（全屏窗口）时显示，避免非游戏状态下显示 "--" */}
+      {settings.display_items.fps && stats?.is_game_active && (
         <div className="monitor-item">
           <span className="monitor-label">FPS</span>
           <span className="monitor-value text-fps">--</span>

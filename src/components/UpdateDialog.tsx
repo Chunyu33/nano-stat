@@ -135,6 +135,23 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
   );
 }
 
+// 语义化版本比较：a > b 返回 1，a < b 返回 -1，相等返回 0
+// 支持 "v1.0.0" / "1.0.0" / "1.0.0-beta" 等常见格式（预发布后缀按 0 处理）
+function compareVersions(a: string, b: string): number {
+  const parse = (v: string) =>
+    v.replace(/^v/i, '').split(/[-+]/)[0].split('.').map(n => parseInt(n, 10) || 0);
+  const pa = parse(a);
+  const pb = parse(b);
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const na = pa[i] ?? 0;
+    const nb = pb[i] ?? 0;
+    if (na > nb) return 1;
+    if (na < nb) return -1;
+  }
+  return 0;
+}
+
 // 检查更新的 Hook
 export function useUpdateChecker() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
@@ -155,8 +172,9 @@ export function useUpdateChecker() {
         const data = await response.json();
         const latestVersion = data.tag_name?.replace('v', '') || '';
         
-        // 简单的版本比较
-        if (latestVersion && latestVersion !== currentVersion) {
+        // 语义化版本比较：仅当远端版本确实比当前版本新才提示更新
+        // （避免远端 tag 比本地旧时误报，如本地 1.0.1 遇到远端 v1.0.0）
+        if (latestVersion && compareVersions(latestVersion, currentVersion) > 0) {
           setUpdateInfo({
             version: latestVersion,
             releaseNotes: data.body || '',

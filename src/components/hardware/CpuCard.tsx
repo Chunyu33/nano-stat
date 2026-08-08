@@ -90,7 +90,7 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
               <Info className="w-3 h-3 flex-shrink-0 mt-0.5" />
               <span>
                 安装 <a href="https://pawnio.eu" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline">PawnIO 驱动</a>
-                （需管理员）后可读取 CPU 温度
+                （需管理员）后重启应用即可读取 CPU 温度
               </span>
             </div>
           )}

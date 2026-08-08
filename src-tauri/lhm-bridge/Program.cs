@@ -199,11 +199,16 @@ class Program
             switch (hardware.HardwareType)
             {
                 case HardwareType.Cpu:
-                    // 优先 "Package"（封装温度），否则取最大核心温度
+                    // 优先 "Package"（封装温度，最接近真实 CPU 温度），
+                    // 没有 Package 时才取最大核心温度
                     if (sensor.Name.Contains("Package", StringComparison.OrdinalIgnoreCase))
+                    {
                         cpuTemp = temp;
-                    else
+                    }
+                    else if (cpuTemp is null)
+                    {
                         cpuTemp = Math.Max(cpuTemp ?? double.MinValue, temp);
+                    }
                     break;
                 case HardwareType.GpuNvidia:
                 case HardwareType.GpuAmd:

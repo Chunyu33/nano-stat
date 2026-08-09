@@ -48,6 +48,14 @@ function generateHardwareInfoText(data: HardwareOverview): string {
   data.disks.forEach(disk => {
     lines.push(`${disk.name || disk.mount_point} (${disk.disk_type}): ${disk.total.toFixed(0)}GB, 可用 ${disk.available.toFixed(0)}GB`);
   });
+  lines.push('');
+  
+  // 显示器
+  if (data.display && data.display.width > 0 && data.display.refresh_rate > 0) {
+    lines.push('【显示器】');
+    lines.push(`分辨率: ${data.display.width}×${data.display.height}`);
+    lines.push(`刷新率: ${data.display.refresh_rate}Hz`);
+  }
   
   return lines.join('\n');
 }
@@ -224,7 +232,7 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
           </div>
         </div>
 
-        {/* 显示器信息 */}
+        {/* 显示器信息（动态获取当前模式，非硬编码） */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
             <Monitor className="w-3.5 h-3.5 text-blue-400" />
@@ -232,9 +240,15 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
           </div>
           <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>主显示器</p>
           <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-            分辨率: <span style={{ color: 'var(--color-text-secondary)' }}>1920×1080</span>
+            分辨率: <span style={{ color: 'var(--color-text-secondary)' }}>
+              {data.display && data.display.width > 0
+                ? `${data.display.width}×${data.display.height}`
+                : '--'}
+            </span>
             <span className="mx-2">|</span>
-            刷新率: <span className="text-blue-400 font-medium">165Hz</span>
+            刷新率: <span className="text-blue-400 font-medium">
+              {data.display && data.display.refresh_rate > 0 ? `${data.display.refresh_rate}Hz` : '--'}
+            </span>
           </div>
         </div>
 

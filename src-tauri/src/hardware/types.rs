@@ -17,6 +17,19 @@ pub struct HardwareOverview {
     pub disks: Vec<DiskInfo>,
     /// 网络信息
     pub network: NetworkInfo,
+    /// 显示器信息（当前分辨率与刷新率）
+    pub display: DisplayInfo,
+}
+
+/// 显示器信息
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct DisplayInfo {
+    /// 当前分辨率宽度 (物理像素)
+    pub width: u32,
+    /// 当前分辨率高度 (物理像素)
+    pub height: u32,
+    /// 当前刷新率 (Hz)
+    pub refresh_rate: u32,
 }
 
 /// CPU 详细信息

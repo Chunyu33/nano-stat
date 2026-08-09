@@ -15,6 +15,7 @@ pub mod network;
 pub mod game;
 pub mod lhm;
 pub mod fps;
+pub mod display;
 pub mod types;
 
 use types::*;
@@ -40,6 +41,7 @@ pub fn get_hardware_overview() -> HardwareOverview {
         memory: memory::get_memory_info(&sys),
         disks: disk::get_disk_info(&sys),
         network: network::get_network_info(&sys),
+        display: display::get_display_info(),
     }
 }
 

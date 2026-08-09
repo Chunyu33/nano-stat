@@ -48,7 +48,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   window size scales automatically with the chosen font size **and the number of enabled display
   items** (width ≈ 28px + 7.0em/item, so content is never clipped).
 - Overlay is now positioned closer to the screen edges (margin 20 → 6 px).
+- **Network rate auto-scaling** — download speed now formats as KB/s → MB/s → GB/s
+  (`src/utils/format.ts`, shared by overlay and monitor page) instead of raw KB numbers.
+- **Monitor page layout** — preview and current-config panels merged into a single container that
+  fills the full width; the preview keeps a fixed font size (only position / display items / opacity
+  are synced), so it never overflows and stays tidy.
 - Update dialog now follows the app theme (was hardcoded dark).
+
+### Fixed
+
+- **Monitor info was hardcoded** — the hardware overview page showed a hardcoded `1920×1080 / 165Hz`
+  regardless of the actual monitor. Display info is now queried live via Win32
+  `EnumDisplaySettingsW(ENUM_CURRENT_SETTINGS)` (new `display.rs`), so resolution and refresh rate
+  always reflect the current monitor (verified: 2560×1440 @ 144Hz).
 
 ### Changed
 

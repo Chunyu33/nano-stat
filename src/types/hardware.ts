@@ -113,6 +113,18 @@ export interface HardwareOverview {
   disks: DiskInfo[];
   /** 网络信息 */
   network: NetworkInfo;
+  /** 显示器信息（当前分辨率与刷新率） */
+  display: DisplayInfo;
+}
+
+/** 显示器信息 */
+export interface DisplayInfo {
+  /** 当前分辨率宽度 (物理像素) */
+  width: number;
+  /** 当前分辨率高度 (物理像素) */
+  height: number;
+  /** 当前刷新率 (Hz) */
+  refresh_rate: number;
 }
 
 /** 网络统计数据 */

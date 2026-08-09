@@ -8,6 +8,7 @@ import type { CSSProperties } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { RealtimeStats, MonitorSettings } from '../types/hardware';
+import { formatSpeed } from '../utils/format';
 
 /** 默认设置 */
 const defaultSettings: MonitorSettings = {
@@ -137,12 +138,12 @@ export function OverlayPanel() {
         </div>
       )}
 
-      {/* 网络速率 */}
+      {/* 网络速率（自动换算 KB/s → MB/s → GB/s） */}
       {settings.display_items.network && (
         <div className="monitor-item">
           <span className="monitor-label">网络</span>
           <span className="monitor-value text-network">
-            ↓{stats?.network_stats.download_rate.toFixed(0) ?? '--'}KB/s
+            ↓{formatSpeed(stats?.network_stats.download_rate ?? 0)}
           </span>
         </div>
       )}

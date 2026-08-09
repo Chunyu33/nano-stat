@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import type { CSSProperties } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { RealtimeStats, MonitorSettings } from '../types/hardware';
@@ -23,6 +24,7 @@ const defaultSettings: MonitorSettings = {
   },
   refresh_interval: 1000,
   opacity: 80,
+  font_size: 12,
 };
 
 export function OverlayPanel() {
@@ -70,13 +72,15 @@ export function OverlayPanel() {
     return () => clearInterval(interval);
   }, [settings.refresh_interval]);
 
-  // 判断是否为垂直布局
+  // 判断是否为垂直布局（仅左右居中位置；四角使用水平紧凑条）
   const isVertical = settings.position === 'LeftCenter' || settings.position === 'RightCenter';
 
-  // 面板样式
+  // 面板样式：透明度只作用于背景（--panel-bg-alpha），文字指标保持不透明；
+  // 文字大小通过 --panel-font-size 控制（容器尺寸由 Rust 端随字号自适应）
   const panelStyle = {
-    opacity: settings.opacity / 100,
-  };
+    '--panel-bg-alpha': settings.opacity / 100,
+    '--panel-font-size': `${settings.font_size}px`,
+  } as CSSProperties;
 
   return (
     <div
@@ -143,11 +147,13 @@ export function OverlayPanel() {
         </div>
       )}
 
-      {/* FPS：始终显示（真实帧率采集尚未接入，暂显示 "--"） */}
+      {/* FPS：全程显示（游戏前台为游戏帧率，非游戏为桌面整体帧率） */}
       {settings.display_items.fps && (
         <div className="monitor-item">
           <span className="monitor-label">FPS</span>
-          <span className="monitor-value text-fps">--</span>
+          <span className="monitor-value text-fps">
+            {stats?.fps != null ? stats.fps.toFixed(0) : '--'}
+          </span>
         </div>
       )}
     </div>

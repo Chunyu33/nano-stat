@@ -23,8 +23,10 @@ A lightweight, modern desktop hardware monitoring tool for Windows — real-time
 ## Features
 
 - **Hardware overview** — CPU / GPU / memory / disk / network cards with live charts
-- **In-game overlay** — transparent, always-on-top monitor; configurable position, display items, refresh interval, and opacity
-- **Smart FPS item** — the FPS row stays visible; foreground fullscreen-game detection is wired for future real FPS capture
+- **In-game overlay** — transparent, always-on-top monitor; 8 positions (edge-center + four corners), configurable display items, refresh interval, and background-only opacity (text stays sharp)
+- **Smart FPS item** — real game FPS via ETW (no injection, anti-cheat safe); counts the foreground
+  window process (per-game when a fullscreen game is active), falls back to desktop frame rate when
+  the foreground process emits no frames — always shown, never inflated by background processes
 - **Wide GPU support** — NVIDIA via NVML (full telemetry); AMD / Intel via WMI (basic info)
 - **CPU temperature** — WMI thermal zone out of the box; with the optional PawnIO kernel driver
   (run as admin) full MSR-based CPU/motherboard temps via the LibreHardwareMonitor bridge

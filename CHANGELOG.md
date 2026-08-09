@@ -22,8 +22,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   install-guide hint. The bridge exits automatically when the parent process closes (stdin EOF).
 - **Foreground game detection** (`is_game_active` in realtime stats): the overlay now checks whether a
   fullscreen window is in the foreground (kept for future real FPS capture; FPS row stays visible).
+- **Real game FPS via ETW** (no injection): a Windows Event Tracing session listens for
+  D3D9/DXGI `Present_Start` events and counts frames per second for the **foreground window process**
+  (per-game when a fullscreen game is active). If the foreground process emits no frames for 3 s
+  (e.g. a browser rendering in GPU child processes), it falls back to the overall desktop frame rate,
+  so FPS is always shown — accurate in-game, never inflated by DWM/background processes.
+  Safe against anti-cheat systems (no process injection, no memory modification) — same technique
+  as NVIDIA FrameView / PresentMon. Requires administrator (or Performance Log Users) privileges.
 - **Settings change events**: the Rust backend now emits a `settings-changed` event when settings are
   saved, so the overlay updates instantly instead of polling every second.
+
+### UI / UX
+
+- **Reusable themed checkbox** — new `Checkbox` component (`src/components/ui/Checkbox.tsx`) following
+  the app's emerald theme variables, used by the settings dialog.
+- **Modal transitions** — `framer-motion` added; settings and update dialogs now animate
+  (fade + scale) on open/close.
+- **Background-only opacity** — the overlay's transparency setting now affects only the panel
+  background (via `--panel-bg-alpha`), while text/values stay fully opaque.
+- **Live preview** — settings changes (opacity, display items, refresh interval) sync to the backend
+  debounced (150 ms) and apply to the overlay immediately without pressing Save.
+- **Four corner positions** — overlay can now be placed at top-left / top-right / bottom-left /
+  bottom-right (compact horizontal bar), in addition to the four edge-center positions.
+- **Font size setting** — new "文字大小" slider (10–20 px) in the settings dialog; the overlay's
+  window size scales automatically with the chosen font size **and the number of enabled display
+  items** (width ≈ 28px + 7.0em/item, so content is never clipped).
+- Overlay is now positioned closer to the screen edges (margin 20 → 6 px).
+- Update dialog now follows the app theme (was hardcoded dark).
 
 ### Changed
 

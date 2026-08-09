@@ -3,7 +3,7 @@
  * 展示监控预览和配置说明
  */
 
-import { Monitor, Settings, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Monitor, Settings, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight } from 'lucide-react';
 import { useMonitorSettings } from '../hooks/useMonitorSettings';
 import { useHardwareData } from '../hooks/useHardwareData';
 import type { MonitorPosition } from '../types/hardware';
@@ -14,6 +14,10 @@ const positionIcons: Record<MonitorPosition, typeof ArrowUp> = {
   BottomCenter: ArrowDown,
   LeftCenter: ArrowLeft,
   RightCenter: ArrowRight,
+  TopLeft: ArrowUpLeft,
+  TopRight: ArrowUpRight,
+  BottomLeft: ArrowDownLeft,
+  BottomRight: ArrowDownRight,
 };
 
 /** 位置标签映射 */
@@ -22,7 +26,26 @@ const positionLabels: Record<MonitorPosition, string> = {
   BottomCenter: '底部中间',
   LeftCenter: '左侧中间',
   RightCenter: '右侧中间',
+  TopLeft: '左上角',
+  TopRight: '右上角',
+  BottomLeft: '左下角',
+  BottomRight: '右下角',
 };
+
+/** 位置 CSS 类映射（预览模拟屏幕内的定位） */
+const positionClasses: Record<MonitorPosition, string> = {
+  TopCenter: 'top-2 left-1/2 -translate-x-1/2',
+  BottomCenter: 'bottom-2 left-1/2 -translate-x-1/2',
+  LeftCenter: 'left-2 top-1/2 -translate-y-1/2',
+  RightCenter: 'right-2 top-1/2 -translate-y-1/2',
+  TopLeft: 'top-2 left-2',
+  TopRight: 'top-2 right-2',
+  BottomLeft: 'bottom-2 left-2',
+  BottomRight: 'bottom-2 right-2',
+};
+
+/** 垂直布局位置（仅左右居中） */
+const verticalPositions: MonitorPosition[] = ['LeftCenter', 'RightCenter'];
 
 export function MonitorPage() {
   const { settings } = useMonitorSettings();
@@ -50,25 +73,19 @@ export function MonitorPage() {
           
           {/* 模拟屏幕 */}
           <div className="relative rounded-xl overflow-hidden" style={{ backgroundColor: '#0a0e14', border: '1px solid #2d3748', height: '200px' }}>
-            {/* 监控面板预览 - 简化显示 */}
+            {/* 监控面板预览 - 简化显示（背景透明度实时生效，文字不透明） */}
             <div
-              className={`absolute rounded-md ${
-                settings.position === 'TopCenter' ? 'top-2 left-1/2 -translate-x-1/2' :
-                settings.position === 'BottomCenter' ? 'bottom-2 left-1/2 -translate-x-1/2' :
-                settings.position === 'LeftCenter' ? 'left-2 top-1/2 -translate-y-1/2' :
-                'right-2 top-1/2 -translate-y-1/2'
-              }`}
+              className={`absolute rounded-md ${positionClasses[settings.position]}`}
               style={{ 
-                opacity: settings.opacity / 100,
-                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                backgroundColor: `rgba(15, 23, 42, ${settings.opacity / 100})`,
                 border: '1px solid rgba(71, 85, 105, 0.5)',
                 padding: '6px 10px',
-                fontSize: '10px',
-                maxWidth: settings.position === 'LeftCenter' || settings.position === 'RightCenter' ? '80px' : '90%'
+                fontSize: `${settings.font_size}px`,
+                maxWidth: verticalPositions.includes(settings.position) ? '80px' : '90%'
               }}
             >
               <div className={`flex ${
-                settings.position === 'LeftCenter' || settings.position === 'RightCenter' 
+                verticalPositions.includes(settings.position)
                   ? 'flex-col gap-1' 
                   : 'flex-row gap-3 flex-wrap'
               }`}>
@@ -94,6 +111,20 @@ export function MonitorPage() {
                   <div className="flex items-center gap-1">
                     <span style={{ color: '#94a3b8' }}>内存</span>
                     <span className="text-purple-400 font-medium">{realtime?.memory_usage.toFixed(0) || '--'}%</span>
+                  </div>
+                )}
+                {settings.display_items.network && (
+                  <div className="flex items-center gap-1">
+                    <span style={{ color: '#94a3b8' }}>网络</span>
+                    <span className="text-blue-400 font-medium">
+                      ↓{realtime?.network_stats.download_rate.toFixed(0) || '--'}KB/s
+                    </span>
+                  </div>
+                )}
+                {settings.display_items.fps && (
+                  <div className="flex items-center gap-1">
+                    <span style={{ color: '#94a3b8' }}>FPS</span>
+                    <span className="text-yellow-400 font-medium">{realtime?.fps != null ? realtime.fps.toFixed(0) : '--'}</span>
                   </div>
                 )}
               </div>

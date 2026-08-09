@@ -141,12 +141,22 @@ export interface RealtimeStats {
   network_stats: NetworkStats;
   /** 前台是否检测到游戏（全屏窗口） */
   is_game_active: boolean;
+  /** 游戏帧率 (FPS，ETW 采集；非游戏或无权限时为 null) */
+  fps: number | null;
   /** 时间戳 */
   timestamp: number;
 }
 
 /** 监控面板位置 */
-export type MonitorPosition = 'TopCenter' | 'BottomCenter' | 'LeftCenter' | 'RightCenter';
+export type MonitorPosition =
+  | 'TopCenter'
+  | 'BottomCenter'
+  | 'LeftCenter'
+  | 'RightCenter'
+  | 'TopLeft'
+  | 'TopRight'
+  | 'BottomLeft'
+  | 'BottomRight';
 
 /** 显示项目配置 */
 export interface DisplayItems {
@@ -178,4 +188,6 @@ export interface MonitorSettings {
   refresh_interval: number;
   /** 透明度 (0-100) */
   opacity: number;
+  /** 面板文字大小 (px, 10-20) */
+  font_size: number;
 }

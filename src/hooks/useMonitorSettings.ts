@@ -22,6 +22,7 @@ const defaultSettings: MonitorSettings = {
   },
   refresh_interval: 1000,
   opacity: 80,
+  font_size: 12,
 };
 
 interface UseMonitorSettingsResult {

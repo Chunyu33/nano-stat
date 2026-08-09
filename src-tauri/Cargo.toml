@@ -39,6 +39,12 @@ windows-sys = { version = "0.59", features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
 ] }
+# Windows API（ETW 事件跟踪，用于 FPS 采集）
+windows = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_System_Diagnostics_Etw",
+    "Win32_System_Time",
+] }
 # 时间处理
 chrono = "0.4"
 # 延迟初始化

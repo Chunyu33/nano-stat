@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Sparkles } from 'lucide-react';
 import { getVersion } from '@tauri-apps/api/app';
 
@@ -22,6 +23,22 @@ interface UpdateDialogProps {
   /** 更新信息 */
   updateInfo: UpdateInfo | null;
 }
+
+/** 遮罩层动画 */
+const overlayMotion = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+  transition: { duration: 0.18 },
+};
+
+/** 弹窗内容动画 */
+const contentMotion = {
+  initial: { opacity: 0, scale: 0.95, y: 12 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.95, y: 12 },
+  transition: { duration: 0.2, ease: 'easeOut' as const },
+};
 
 export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogProps) {
   const [downloading, setDownloading] = useState(false);
@@ -48,89 +65,120 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        {/* 遮罩层 */}
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
-        
-        {/* 弹窗内容 */}
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] bg-[#141a24] border border-[#2a3441] rounded-xl shadow-2xl z-50 overflow-hidden">
-          {/* 标题栏 */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#2a3441] bg-[#0f1419]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-green-400" />
-              </div>
-              <Dialog.Title className="text-base font-semibold text-gray-100">
-                发现新版本
-              </Dialog.Title>
-            </div>
-            <Dialog.Close asChild>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#2a3441] transition-colors">
-                <X className="w-4 h-4 text-gray-400" />
-              </button>
-            </Dialog.Close>
-          </div>
+      <AnimatePresence>
+        {open && (
+          <Dialog.Portal forceMount>
+            {/* 遮罩层 */}
+            <Dialog.Overlay forceMount asChild>
+              <motion.div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" {...overlayMotion} />
+            </Dialog.Overlay>
 
-          {/* 内容 */}
-          <div style={{ padding: '20px' }}>
-            {/* 版本信息 */}
-            <div className="flex items-center justify-between mb-4 p-4 bg-[#0f1419] rounded-lg border border-[#2a3441]">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">新版本</p>
-                <p className="text-lg font-bold text-green-400">v{updateInfo.version}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-500 mb-1">当前版本</p>
-                <p className="text-sm text-gray-400">v{currentVersion}</p>
-              </div>
-            </div>
+            {/* 弹窗内容（跟随主题变量） */}
+            <Dialog.Content forceMount asChild>
+              <motion.div
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] rounded-xl shadow-2xl z-50 overflow-hidden"
+                style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}
+                {...contentMotion}
+              >
+                {/* 标题栏 */}
+                <div
+                  className="flex items-center justify-between px-6 py-4 border-b"
+                  style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-sidebar)' }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-green-400" />
+                    </div>
+                    <Dialog.Title style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                      发现新版本
+                    </Dialog.Title>
+                  </div>
+                  <Dialog.Close asChild>
+                    <button className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-bg-input)]">
+                      <X className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }} />
+                    </button>
+                  </Dialog.Close>
+                </div>
 
-            {/* 更新说明 */}
-            <div className="mb-4">
-              <p className="text-sm font-medium text-gray-100 mb-2">更新内容</p>
-              <div className="p-3 bg-[#0f1419] rounded-lg border border-[#2a3441] max-h-32 overflow-y-auto">
-                <p className="text-xs text-gray-400 whitespace-pre-wrap leading-relaxed">
-                  {updateInfo.releaseNotes || '- 性能优化和 Bug 修复'}
-                </p>
-              </div>
-            </div>
+                {/* 内容 */}
+                <div style={{ padding: '20px' }}>
+                  {/* 版本信息 */}
+                  <div
+                    className="flex items-center justify-between mb-4 p-4 rounded-lg border"
+                    style={{ backgroundColor: 'var(--color-bg-input)', borderColor: 'var(--color-border)' }}
+                  >
+                    <div>
+                      <p className="mb-1" style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>新版本</p>
+                      <p className="text-lg font-bold text-green-400">v{updateInfo.version}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="mb-1" style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>当前版本</p>
+                      <p style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>v{currentVersion}</p>
+                    </div>
+                  </div>
 
-            {/* 提示 */}
-            <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg mb-4">
-              <p className="text-xs text-cyan-400">
-                建议更新到最新版本以获得更好的体验和新功能。
-              </p>
-            </div>
-          </div>
+                  {/* 更新说明 */}
+                  <div className="mb-4">
+                    <p className="mb-2" style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-text-primary)' }}>更新内容</p>
+                    <div
+                      className="p-3 rounded-lg border max-h-32 overflow-y-auto"
+                      style={{ backgroundColor: 'var(--color-bg-input)', borderColor: 'var(--color-border)' }}
+                    >
+                      <p
+                        className="whitespace-pre-wrap leading-relaxed"
+                        style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}
+                      >
+                        {updateInfo.releaseNotes || '- 性能优化和 Bug 修复'}
+                      </p>
+                    </div>
+                  </div>
 
-          {/* 底部按钮 */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', padding: '16px 20px', borderTop: '1px solid #2a3441', background: '#0f1419' }}>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="px-4 py-2 text-xs font-medium text-gray-400 hover:text-gray-200 transition-colors rounded-lg hover:bg-[#2a3441]"
-            >
-              稍后提醒
-            </button>
-            <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="flex items-center gap-2 px-5 py-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white text-xs font-semibold rounded-lg transition-colors"
-            >
-              {downloading ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>下载中...</span>
-                </>
-              ) : (
-                <>
-                  <Download className="w-3.5 h-3.5" />
-                  <span>立即更新</span>
-                </>
-              )}
-            </button>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
+                  {/* 提示 */}
+                  <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg mb-4">
+                    <p className="text-xs text-cyan-400">
+                      建议更新到最新版本以获得更好的体验和新功能。
+                    </p>
+                  </div>
+                </div>
+
+                {/* 底部按钮 */}
+                <div
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px',
+                    padding: '16px 20px', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-sidebar)',
+                  }}
+                >
+                  <button
+                    onClick={() => onOpenChange(false)}
+                    className="px-4 py-2 rounded-lg transition-colors"
+                    style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', backgroundColor: 'transparent' }}
+                  >
+                    稍后提醒
+                  </button>
+                  <button
+                    onClick={handleDownload}
+                    disabled={downloading}
+                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white rounded-lg transition-colors"
+                    style={{ padding: '10px 20px', fontSize: 12, fontWeight: 600 }}
+                  >
+                    {downloading ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>下载中...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-3.5 h-3.5" />
+                        <span>立即更新</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        )}
+      </AnimatePresence>
     </Dialog.Root>
   );
 }

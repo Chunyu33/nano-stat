@@ -14,6 +14,7 @@ pub mod disk;
 pub mod network;
 pub mod game;
 pub mod lhm;
+pub mod fps;
 pub mod types;
 
 use types::*;
@@ -51,6 +52,13 @@ pub fn get_realtime_stats() -> RealtimeStats {
     sys.refresh_cpu_usage();
     sys.refresh_memory();
     
+    // FPS 采集：始终按前台窗口进程统计（全屏游戏=游戏帧率，桌面=前台应用帧率），
+    // 拿不到前台进程（如悬浮窗自身在前台）时才统计所有进程。
+    // 避免混入 DWM 合成器与后台应用的 Present 事件导致数值偏高。
+    let is_game_active = game::is_game_active();
+    fps::set_target_pid(game::get_foreground_pid());
+    fps::settle_fps();
+    
     RealtimeStats {
         cpu_usage: cpu::get_cpu_usage(&sys),
         cpu_temp: cpu::get_cpu_temperature(&sys),
@@ -58,7 +66,9 @@ pub fn get_realtime_stats() -> RealtimeStats {
         gpu_temp: gpu::get_gpu_temperature(),
         memory_usage: memory::get_memory_usage(&sys),
         network_stats: network::get_network_stats(&sys),
-        is_game_active: game::is_game_active(),
+        is_game_active,
+        // 始终返回 FPS（非游戏时是桌面整体帧率），前端全程显示
+        fps: fps::get_fps(),
         timestamp: chrono::Utc::now().timestamp_millis(),
     }
 }

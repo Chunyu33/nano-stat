@@ -17,28 +17,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 悬浮面板容器 */
+/* 悬浮面板容器
+   注意：透明度只作用于背景（--panel-bg-alpha），文字指标始终不透明；
+   边框/阴影也跟随 alpha，透明度高时不会出现突兀的黑边 */
 .overlay-panel {
   width: 100%;
   height: 100%;
-  background: rgba(20, 25, 32, 0.95);
+  /* 背景 alpha 由前端根据设置注入，默认 0.95 */
+  background: rgba(20, 25, 32, var(--panel-bg-alpha, 0.95));
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(55, 65, 81, 0.6);
+  /* 边框透明度与背景联动（乘 0.6 保持原有层次），透明面板不显黑边 */
+  border: 1px solid rgba(55, 65, 81, calc(var(--panel-bg-alpha, 0.95) * 0.6));
   border-radius: 6px;
   padding: 8px 14px;
   color: #f7fafc !important;
-  font-size: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  /* 文字大小由设置注入（--panel-font-size），label/value 用 em 跟随 */
+  font-size: var(--panel-font-size, 12px);
+  /* 阴影随透明度减弱，避免透明时出现黑色边缘 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, calc(var(--panel-bg-alpha, 0.95) * 0.4));
   white-space: nowrap;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 水平布局（顶部/底部） */
+/* 水平布局（顶部/底部/四角） */
 .overlay-horizontal {
   flex-direction: row;
-  gap: 14px;
+  gap: 1.1em;
 }
 
 /* 垂直布局（左侧/右侧） */
@@ -46,7 +52,7 @@ body {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 4px;
+  gap: 0.3em;
   padding: 8px 12px;
 }
 
@@ -54,18 +60,18 @@ body {
 .monitor-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.3em;
 }
 
 .monitor-label {
   color: #9ca3af;
-  font-size: 11px;
+  font-size: 0.92em;
   font-weight: 500;
 }
 
 .monitor-value {
   font-weight: 700;
-  font-size: 12px;
+  font-size: 1em;
 }
 
 /* 颜色类 */

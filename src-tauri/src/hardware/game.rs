@@ -13,6 +13,32 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
     GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN,
 };
 
+/// 获取前台窗口的进程 PID（用于 FPS 采集按进程过滤）
+/// 排除自身进程，返回 None 表示无有效前台窗口
+pub fn get_foreground_pid() -> Option<u32> {
+    unsafe {
+        // 获取前台窗口
+        let hwnd: HWND = GetForegroundWindow();
+        if hwnd.is_null() {
+            return None;
+        }
+
+        // 窗口必须可见
+        if IsWindowVisible(hwnd) == 0 {
+            return None;
+        }
+
+        // 排除自身进程的窗口（主窗口、悬浮窗口）
+        let mut pid: u32 = 0;
+        GetWindowThreadProcessId(hwnd, &mut pid);
+        if pid == 0 || pid == std::process::id() {
+            return None;
+        }
+
+        Some(pid)
+    }
+}
+
 /// 判断前台窗口是否被判定为"游戏"（全屏/无边框全屏窗口）
 pub fn is_game_active() -> bool {
     unsafe {

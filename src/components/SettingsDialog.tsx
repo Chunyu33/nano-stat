@@ -196,7 +196,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
             {/* 弹窗内容 */}
             <Dialog.Content forceMount asChild>
               <motion.div
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] max-h-[85vh] rounded-xl shadow-2xl z-50 overflow-hidden bg-[var(--color-bg-card)] border border-[var(--color-border)]"
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] min-w-[560px] max-w-[900px] max-h-[85vh] rounded-xl shadow-2xl z-50 overflow-hidden bg-[var(--color-bg-card)] border border-[var(--color-border)]"
                 {...contentMotion}
               >
                 {/* 标题栏 */}

@@ -3,7 +3,7 @@
  * 展示监控预览和配置说明（合并为单一盒子：上方实时预览，下方当前配置）
  */
 
-import { Monitor, Settings, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight } from 'lucide-react';
+import { Monitor, Settings, RefreshCw, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight } from 'lucide-react';
 import { useMonitorSettings } from '../hooks/useMonitorSettings';
 import { useHardwareData } from '../hooks/useHardwareData';
 import { formatSpeed } from '../utils/format';
@@ -59,7 +59,7 @@ function ConfigRow({ label, children }: { label: string; children: React.ReactNo
 }
 
 export function MonitorPage() {
-  const { settings } = useMonitorSettings();
+  const { settings, loading: settingsLoading, refreshSettings } = useMonitorSettings();
   const { realtime } = useHardwareData(1000);
 
   const PositionIcon = positionIcons[settings.position];
@@ -81,7 +81,19 @@ export function MonitorPage() {
       {/* 合并容器：预览 + 当前配置（占满可用宽度） */}
       <div className="card w-full p-6">
         {/* 监控面板预览 */}
-        <h2 className="text-base font-semibold text-[var(--color-text-primary)] mb-4">监控面板预览</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-[var(--color-text-primary)]">监控面板预览</h2>
+          <button
+            type="button"
+            onClick={() => void refreshSettings()}
+            disabled={settingsLoading}
+            title="刷新预览设置"
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-input)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] transition-colors hover:border-emerald-500/50 hover:text-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${settingsLoading ? 'animate-spin' : ''}`} />
+            刷新预览
+          </button>
+        </div>
 
         {/* 模拟屏幕（宽度撑满容器，高度固定，预览面板只同步位置/显示项/透明度，字号固定） */}
         <div className="relative rounded-xl overflow-hidden h-[240px] bg-[linear-gradient(160deg,#0b0f16_0%,#111827_60%,#0a0e14_100%)] border border-[#2d3748]">

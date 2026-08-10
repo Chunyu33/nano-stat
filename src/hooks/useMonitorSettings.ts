@@ -30,6 +30,8 @@ interface UseMonitorSettingsResult {
   settings: MonitorSettings;
   /** 是否正在加载 */
   loading: boolean;
+  /** 重新读取设置，用于同步其他窗口保存的配置 */
+  refreshSettings: () => Promise<void>;
   /** 保存设置 */
   saveSettings: (settings: MonitorSettings) => Promise<void>;
 }
@@ -41,23 +43,23 @@ export function useMonitorSettings(): UseMonitorSettingsResult {
   const [settings, setSettings] = useState<MonitorSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
 
-  // 加载设置
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const data = await getMonitorSettings();
-        setSettings(data);
-      } catch (err) {
-        console.error('Failed to load monitor settings:', err);
-        // 使用默认设置
-        setSettings(defaultSettings);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadSettings();
+  // 加载设置，也用于同步设置弹窗保存后的最新配置
+  const refreshSettings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getMonitorSettings();
+      setSettings(data);
+    } catch (err) {
+      console.error('Failed to load monitor settings:', err);
+      // 初次加载失败时保留默认设置；刷新失败时保留当前设置
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void refreshSettings();
+  }, [refreshSettings]);
 
   // 保存设置
   const saveSettings = useCallback(async (newSettings: MonitorSettings) => {
@@ -73,6 +75,7 @@ export function useMonitorSettings(): UseMonitorSettingsResult {
   return {
     settings,
     loading,
+    refreshSettings,
     saveSettings,
   };
 }

@@ -196,8 +196,8 @@ fn calculate_overlay_position(
     window_width: f64,
     window_height: f64,
 ) -> (f64, f64) {
-    // 边距（贴近屏幕边缘，但留少量呼吸空间）
-    let margin = 6.0;
+    // 边距：给悬浮窗保留明确的屏幕外沿呼吸空间
+    let margin = 16.0;
     match position {
         MonitorPosition::TopCenter => (
             (screen_width - window_width) / 2.0,
@@ -253,10 +253,10 @@ fn overlay_window_size(position: &MonitorPosition, settings: &MonitorSettings) -
             (width, fs * 2.4 + 14.0)
         }
         // 垂直条（左右中）：
-        // 宽度 = 最长项（约 7.0em）；高度 = padding + n × 行高(1.8em + 4px)
+        // 高度按实际 CSS 行高与行间距估算，避免窗口比内容高出一大截。
         MonitorPosition::LeftCenter | MonitorPosition::RightCenter => {
             let width = 28.0 + fs * 7.0;
-            let height = 16.0 + n * (fs * 1.8 + 4.0);
+            let height = 18.0 + n * (fs * 1.2) + (n - 1.0) * (fs * 0.35);
             (width, height)
         }
     }

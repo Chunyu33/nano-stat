@@ -80,7 +80,7 @@ export function AboutPage() {
             </div>
             <div className="flex-1">
               <h3 className="text-base font-semibold text-[var(--color-text-primary)] mb-1">
-                Evan Lau
+                Evan
               </h3>
               <p className="text-[13px] text-[var(--color-text-muted)]">
                 一个平平无奇的人。
@@ -140,7 +140,7 @@ export function AboutPage() {
               <span className="min-w-0">
                 <span className="block text-[13px] font-medium">抖音 · Evan的像素空间</span>
                 <span className="block mt-1 text-[11px] leading-relaxed text-[var(--color-text-muted)] group-hover:text-[var(--color-text-secondary)]">
-                  查看短视频演示和实用技巧
+                  关注更新、教程和使用演示
                 </span>
               </span>
             </a>
@@ -161,12 +161,12 @@ export function AboutPage() {
               <button
                 key={channel.name}
                 onClick={() => setPreviewQr({ src: channel.src, name: channel.name })}
-                title={`点击放大${channel.name}收款码`}
+                title={`点击放大${channel.name}`}
                 className="flex flex-col items-center gap-2.5 p-4 bg-[var(--color-bg-input)] rounded-xl border border-[var(--color-border)] cursor-pointer transition-all hover:border-emerald-500/50 hover:shadow-lg hover:-translate-y-0.5"
               >
                 <img
                   src={channel.src}
-                  alt={`${channel.name}收款码`}
+                  alt={`${channel.name}`}
                   className="w-[150px] h-[150px] object-contain rounded-lg bg-white"
                 />
                 <span className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--color-text-secondary)]">
@@ -192,21 +192,21 @@ export function AboutPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
+              transition={{ duration: 0.12, ease: 'linear' }}
               onClick={() => setPreviewQr(null)}
-              className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm cursor-zoom-out"
+              className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 cursor-zoom-out will-change-[opacity]"
             >
               <motion.div
-                initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.12, ease: 'linear' }}
                 onClick={e => e.stopPropagation()}
-                className="card p-6 text-center max-w-[90vw] max-h-[90vh]"
+                className="card p-6 text-center max-w-[90vw] max-h-[90vh] will-change-[opacity]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[15px] font-semibold text-[var(--color-text-primary)]">
-                    {previewQr.name}收款码
+                    {previewQr.name}
                   </span>
                   <button
                     onClick={() => setPreviewQr(null)}
@@ -218,7 +218,7 @@ export function AboutPage() {
                 </div>
                 <img
                   src={previewQr.src}
-                  alt={`${previewQr.name}收款码`}
+                  alt={`${previewQr.name}`}
                   className="w-[320px] max-w-[70vw] rounded-lg bg-white"
                 />
                 <p className="text-xs text-[var(--color-text-muted)] mt-3">

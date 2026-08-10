@@ -40,24 +40,24 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
   const usageColor = getUsageColor(cpu.usage);
 
   return (
-    <div className="card" style={{ padding: '16px' }}>
+    <div className="card p-4">
       {/* 卡片标题 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+      <div className="flex items-center gap-3 mb-3.5">
         <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center">
           <Cpu className="w-4 h-4 text-emerald-400" />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>处理器</h3>
-          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }} className="truncate">{cpu.name}</p>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">处理器</h3>
+          <p className="text-xs text-[var(--color-text-muted)] truncate">{cpu.name}</p>
         </div>
       </div>
 
       {/* 主要信息区域 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+      <div className="grid grid-cols-2 gap-3 mb-3.5">
         {/* 使用率 */}
-        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>占用</span>
+        <div className="bg-[var(--color-bg-input)] rounded-lg p-3">
+          <div className="flex items-baseline justify-between mb-2">
+            <span className="text-xs text-[var(--color-text-muted)]">占用</span>
             <span className="text-xl font-bold" style={{ color: usageColor }}>
               {cpu.usage.toFixed(0)}%
             </span>
@@ -71,9 +71,9 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
         </div>
 
         {/* 温度 */}
-        <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>温度</span>
+        <div className="bg-[var(--color-bg-input)] rounded-lg p-3">
+          <div className="flex items-baseline justify-between mb-2">
+            <span className="text-xs text-[var(--color-text-muted)]">温度</span>
             <span className="text-xl font-bold text-emerald-400">
               {cpu.temperature ? `${cpu.temperature.toFixed(0)}°C` : 'N/A'}
             </span>
@@ -86,7 +86,7 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
           </div>
           {/* 驱动缺失提示（温度不可用时引导） */}
           {!cpu.temperature && driverMissing && (
-            <div className="flex items-start gap-1.5 mt-2" style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
+            <div className="flex items-start gap-1.5 mt-2 text-[11px] text-[var(--color-text-muted)]">
               <Info className="w-3 h-3 flex-shrink-0 mt-0.5" />
               <span>
                 安装 <a href="https://pawnio.eu" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline">PawnIO 驱动</a>
@@ -98,7 +98,7 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
       </div>
 
       {/* 使用率图表 */}
-      <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ height: '80px', marginBottom: '14px', padding: '8px' }}>
+      <div className="bg-[var(--color-bg-input)] rounded-lg h-20 mb-3.5 p-2">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
@@ -121,17 +121,17 @@ export function CpuCard({ cpu, usageHistory }: CpuCardProps) {
       </div>
 
       {/* 详细信息 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+      <div className="grid grid-cols-3 gap-2">
         <div className="text-center">
-          <span style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-muted)' }}>核心数</span>
-          <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{cpu.cores}</span>
+          <span className="block text-xs text-[var(--color-text-muted)]">核心数</span>
+          <span className="text-sm font-medium text-[var(--color-text-primary)]">{cpu.cores}</span>
         </div>
         <div className="text-center">
-          <span style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-muted)' }}>线程数</span>
-          <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text-primary)' }}>{cpu.threads}</span>
+          <span className="block text-xs text-[var(--color-text-muted)]">线程数</span>
+          <span className="text-sm font-medium text-[var(--color-text-primary)]">{cpu.threads}</span>
         </div>
         <div className="text-center">
-          <span style={{ display: 'block', fontSize: '12px', color: 'var(--color-text-muted)' }}>频率</span>
+          <span className="block text-xs text-[var(--color-text-muted)]">频率</span>
           <span className="text-emerald-400 text-sm font-medium">{cpu.frequency} MHz</span>
         </div>
       </div>

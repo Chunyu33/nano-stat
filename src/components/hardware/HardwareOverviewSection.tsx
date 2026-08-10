@@ -79,8 +79,8 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
 
   if (!data) {
     return (
-      <div className="card" style={{ padding: '16px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className="card p-4">
+        <div className="flex flex-col gap-4">
           <div className="h-4 bg-gray-700/50 rounded w-1/3"></div>
           <div className="h-20 bg-gray-700/50 rounded-lg"></div>
           <div className="h-20 bg-gray-700/50 rounded-lg"></div>
@@ -90,18 +90,18 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
   }
 
   return (
-    <div className="card" style={{ padding: '16px' }}>
+    <div className="card p-4">
       {/* 标题栏 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: isCollapsed ? '0' : '16px' }}>
+      <div className={`flex items-center gap-2.5 ${isCollapsed ? 'mb-0' : 'mb-4'}`}>
         {/* 折叠按钮 */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          className="flex items-center gap-2.5 flex-1 bg-transparent border-none cursor-pointer p-0"
         >
           <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
             <Cpu className="w-4 h-4 text-emerald-400" />
           </div>
-          <h2 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }} className="flex-1 text-left">硬件概览</h2>
+          <h2 className="flex-1 text-left text-sm font-semibold text-[var(--color-text-primary)]">硬件概览</h2>
           {isCollapsed ? (
             <ChevronRight className="w-4 h-4 text-gray-400" />
           ) : (
@@ -112,14 +112,9 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
         {/* 复制按钮 */}
         <button
           onClick={handleCopyInfo}
-          className="flex items-center gap-1.5 rounded-md transition-all hover:bg-[var(--color-bg-input)]"
-          style={{ 
-            padding: '6px 10px', 
-            fontSize: '11px', 
-            color: copied ? '#10b981' : 'var(--color-text-muted)',
-            border: '1px solid var(--color-border)',
-            background: 'none'
-          }}
+          className={`flex items-center gap-1.5 rounded-md transition-all hover:bg-[var(--color-bg-input)] px-2.5 py-1.5 text-[11px] border border-[var(--color-border)] bg-transparent ${
+            copied ? 'text-emerald-500' : 'text-[var(--color-text-muted)]'
+          }`}
           title="复制硬件信息"
         >
           {copied ? (
@@ -144,23 +139,23 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
         transition: 'max-height 0.3s ease-in-out'
       }}>
         {/* CPU 信息 */}
-        <div style={{ marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid var(--color-border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+        <div className="mb-3.5 pb-3.5 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-1.5 mb-2">
             <Cpu className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-xs text-gray-400">处理器</span>
           </div>
-          <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '6px' }}>{data.cpu.name}</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }} className="text-xs">
-            <div style={{ color: 'var(--color-text-muted)' }}>
-              核心数: <span style={{ color: 'var(--color-text-secondary)' }}>{data.cpu.cores}</span>
+          <p className="text-xs font-medium text-[var(--color-text-primary)] mb-1.5">{data.cpu.name}</p>
+          <div className="grid grid-cols-2 gap-1 text-xs">
+            <div className="text-[var(--color-text-muted)]">
+              核心数: <span className="text-[var(--color-text-secondary)]">{data.cpu.cores}</span>
             </div>
-            <div style={{ color: 'var(--color-text-muted)' }}>
-              线程数: <span style={{ color: 'var(--color-text-secondary)' }}>{data.cpu.threads}</span>
+            <div className="text-[var(--color-text-muted)]">
+              线程数: <span className="text-[var(--color-text-secondary)]">{data.cpu.threads}</span>
             </div>
-            <div style={{ color: 'var(--color-text-muted)' }}>
+            <div className="text-[var(--color-text-muted)]">
               频率: <span className="text-emerald-400 font-medium">{data.cpu.frequency}MHz</span>
             </div>
-            <div style={{ color: 'var(--color-text-muted)' }}>
+            <div className="text-[var(--color-text-muted)]">
               使用率: <span className="text-emerald-400 font-medium">{data.cpu.usage.toFixed(0)}%</span>
             </div>
           </div>
@@ -168,25 +163,25 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
 
         {/* GPU 信息 */}
         {data.gpu && (
-          <div style={{ marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid var(--color-border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+          <div className="mb-3.5 pb-3.5 border-b border-[var(--color-border)]">
+            <div className="flex items-center gap-1.5 mb-2">
               <MonitorPlay className="w-3.5 h-3.5 text-green-400" />
               <span className="text-xs text-gray-400">显卡</span>
             </div>
-            <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '6px' }}>{data.gpu.name}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '12px' }}>
-              <div style={{ color: 'var(--color-text-muted)' }}>
-                显存: <span style={{ color: 'var(--color-text-secondary)' }}>{(data.gpu.vram_total / 1024).toFixed(0)}GB</span>
+            <p className="text-xs font-medium text-[var(--color-text-primary)] mb-1.5">{data.gpu.name}</p>
+            <div className="flex flex-col gap-0.5 text-xs">
+              <div className="text-[var(--color-text-muted)]">
+                显存: <span className="text-[var(--color-text-secondary)]">{(data.gpu.vram_total / 1024).toFixed(0)}GB</span>
                 <span className="text-green-400 ml-1">({data.gpu.vram_used > 0 ? ((data.gpu.vram_used / data.gpu.vram_total) * 100).toFixed(0) : 0}% 已用)</span>
               </div>
               {data.gpu.pcie_info && (
-                <div style={{ color: 'var(--color-text-muted)' }}>
-                  总线: <span style={{ color: 'var(--color-text-secondary)' }}>{data.gpu.pcie_info}</span>
+                <div className="text-[var(--color-text-muted)]">
+                  总线: <span className="text-[var(--color-text-secondary)]">{data.gpu.pcie_info}</span>
                 </div>
               )}
               {data.gpu.driver_version && (
-                <div style={{ color: 'var(--color-text-muted)' }}>
-                  驱动: <span style={{ color: 'var(--color-text-secondary)' }}>{data.gpu.driver_version}</span>
+                <div className="text-[var(--color-text-muted)]">
+                  驱动: <span className="text-[var(--color-text-secondary)]">{data.gpu.driver_version}</span>
                 </div>
               )}
             </div>
@@ -194,38 +189,38 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
         )}
 
         {/* 内存信息 */}
-        <div style={{ marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid var(--color-border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+        <div className="mb-3.5 pb-3.5 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-1.5 mb-2">
             <MemoryStick className="w-3.5 h-3.5 text-purple-400" />
             <span className="text-xs text-gray-400">内存</span>
           </div>
-          <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+          <p className="text-xs font-medium text-[var(--color-text-primary)] mb-1">
             {data.memory.memory_type || 'DDR4'} {(data.memory.total / 1024).toFixed(0)}GB
           </p>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+          <div className="text-xs text-[var(--color-text-muted)]">
             已用: <span className="text-purple-400 font-medium">{(data.memory.used / 1024).toFixed(1)}GB</span>
             <span className="mx-2">|</span>
-            可用: <span style={{ color: 'var(--color-text-secondary)' }}>{(data.memory.available / 1024).toFixed(1)}GB</span>
+            可用: <span className="text-[var(--color-text-secondary)]">{(data.memory.available / 1024).toFixed(1)}GB</span>
           </div>
         </div>
 
         {/* 磁盘信息 */}
-        <div style={{ marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid var(--color-border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+        <div className="mb-3.5 pb-3.5 border-b border-[var(--color-border)]">
+          <div className="flex items-center gap-1.5 mb-2">
             <HardDrive className="w-3.5 h-3.5 text-orange-400" />
             <span className="text-xs text-gray-400">存储</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="flex flex-col gap-2">
             {data.disks.slice(0, 4).map((disk, index) => (
               <div key={index} className="text-xs">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-                  <span style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>{disk.name || disk.mount_point}</span>
-                  <span style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', backgroundColor: 'var(--color-bg-input)', color: 'var(--color-text-muted)' }}>{disk.disk_type}</span>
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="font-medium text-[var(--color-text-primary)]">{disk.name || disk.mount_point}</span>
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--color-bg-input)] text-[var(--color-text-muted)]">{disk.disk_type}</span>
                 </div>
-                <div style={{ color: 'var(--color-text-muted)' }}>
+                <div className="text-[var(--color-text-muted)]">
                   容量: <span className="text-orange-400">{disk.total.toFixed(0)}GB</span>
                   <span className="mx-1">|</span>
-                  可用: <span style={{ color: 'var(--color-text-secondary)' }}>{disk.available.toFixed(0)}GB</span>
+                  可用: <span className="text-[var(--color-text-secondary)]">{disk.available.toFixed(0)}GB</span>
                 </div>
               </div>
             ))}
@@ -234,13 +229,13 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
 
         {/* 显示器信息（动态获取当前模式，非硬编码） */}
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+          <div className="flex items-center gap-1.5 mb-2">
             <Monitor className="w-3.5 h-3.5 text-blue-400" />
             <span className="text-xs text-gray-400">显示器</span>
           </div>
-          <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>主显示器</p>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-            分辨率: <span style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-xs font-medium text-[var(--color-text-primary)] mb-1">主显示器</p>
+          <div className="text-xs text-[var(--color-text-muted)]">
+            分辨率: <span className="text-[var(--color-text-secondary)]">
               {data.display && data.display.width > 0
                 ? `${data.display.width}×${data.display.height}`
                 : '--'}
@@ -253,21 +248,11 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
         </div>
 
         {/* 占位 */}
-        <div style={{ height: '33px' }} />
+        <div className="h-[33px]" />
 
         {/* 折叠时的渐变蒙版 */}
         {isCollapsed && (
-          <div 
-            style={{ 
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '60px',
-              background: 'linear-gradient(to bottom, transparent, var(--color-bg-card))',
-              pointerEvents: 'none'
-            }}
-          />
+          <div className="absolute bottom-0 left-0 right-0 h-[60px] pointer-events-none bg-[linear-gradient(to_bottom,transparent,var(--color-bg-card))]" />
         )}
       </div>
 
@@ -275,21 +260,7 @@ export function HardwareOverviewSection({ data }: HardwareOverviewSectionProps) 
       {isCollapsed && (
         <button
           onClick={() => setIsCollapsed(false)}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            marginTop: '8px',
-            padding: '6px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--color-text-muted)',
-            fontSize: '11px',
-            transition: 'color 0.2s ease'
-          }}
+          className="w-full flex items-center justify-center gap-1 mt-2 py-1.5 bg-transparent border-none cursor-pointer text-[var(--color-text-muted)] text-[11px] hover:text-[var(--color-text-secondary)] transition-colors"
         >
           <ChevronDown className="w-3.5 h-3.5" />
           点击展开更多

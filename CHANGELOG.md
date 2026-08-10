@@ -59,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   background; the main window is hidden until React finishes first paint, eliminating the
   startup white flash. Falls back to the main window after 8 s.
 
+
 ### Fixed
 
 - **Monitor info was hardcoded** — the hardware overview page showed a hardcoded `1920×1080 / 165Hz`

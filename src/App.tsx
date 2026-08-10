@@ -15,6 +15,12 @@ import { useMonitorSettings } from './hooks/useMonitorSettings';
 import { ThemeProvider } from './hooks/useTheme';
 import './styles/globals.css';
 
+const pageTitles: Record<NavItem, string> = {
+  hardware: '硬件信息',
+  monitor: '游戏内监控',
+  about: '关于',
+};
+
 function App() {
   // 当前激活的导航项
   const [activeNav, setActiveNav] = useState<NavItem>('hardware');
@@ -45,7 +51,7 @@ function App() {
     <ThemeProvider>
     <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--color-bg-main)' }}>
       {/* 自定义标题栏 */}
-      <TitleBar onOpenSettings={() => setSettingsOpen(true)} />
+      <TitleBar title={pageTitles[activeNav]} onOpenSettings={() => setSettingsOpen(true)} />
 
       {/* 主内容区域 */}
       <div className="flex-1 flex overflow-hidden">

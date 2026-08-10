@@ -76,58 +76,45 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
             {/* 弹窗内容（跟随主题变量） */}
             <Dialog.Content forceMount asChild>
               <motion.div
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] rounded-xl shadow-2xl z-50 overflow-hidden"
-                style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] rounded-xl shadow-2xl z-50 overflow-hidden bg-[var(--color-bg-card)] border border-[var(--color-border)]"
                 {...contentMotion}
               >
                 {/* 标题栏 */}
-                <div
-                  className="flex items-center justify-between px-6 py-4 border-b"
-                  style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-sidebar)' }}
-                >
+                <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-sidebar)]">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center">
                       <Sparkles className="w-4 h-4 text-green-400" />
                     </div>
-                    <Dialog.Title style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                    <Dialog.Title className="text-base font-semibold text-[var(--color-text-primary)]">
                       发现新版本
                     </Dialog.Title>
                   </div>
                   <Dialog.Close asChild>
                     <button className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-bg-input)]">
-                      <X className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }} />
+                      <X className="w-4 h-4 text-[var(--color-text-secondary)]" />
                     </button>
                   </Dialog.Close>
                 </div>
 
                 {/* 内容 */}
-                <div style={{ padding: '20px' }}>
+                <div className="p-5">
                   {/* 版本信息 */}
-                  <div
-                    className="flex items-center justify-between mb-4 p-4 rounded-lg border"
-                    style={{ backgroundColor: 'var(--color-bg-input)', borderColor: 'var(--color-border)' }}
-                  >
+                  <div className="flex items-center justify-between mb-4 p-4 rounded-lg border bg-[var(--color-bg-input)] border-[var(--color-border)]">
                     <div>
-                      <p className="mb-1" style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>新版本</p>
+                      <p className="mb-1 text-xs text-[var(--color-text-muted)]">新版本</p>
                       <p className="text-lg font-bold text-green-400">v{updateInfo.version}</p>
                     </div>
                     <div className="text-right">
-                      <p className="mb-1" style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>当前版本</p>
-                      <p style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>v{currentVersion}</p>
+                      <p className="mb-1 text-xs text-[var(--color-text-muted)]">当前版本</p>
+                      <p className="text-sm text-[var(--color-text-secondary)]">v{currentVersion}</p>
                     </div>
                   </div>
 
                   {/* 更新说明 */}
                   <div className="mb-4">
-                    <p className="mb-2" style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-text-primary)' }}>更新内容</p>
-                    <div
-                      className="p-3 rounded-lg border max-h-32 overflow-y-auto"
-                      style={{ backgroundColor: 'var(--color-bg-input)', borderColor: 'var(--color-border)' }}
-                    >
-                      <p
-                        className="whitespace-pre-wrap leading-relaxed"
-                        style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}
-                      >
+                    <p className="mb-2 text-sm font-medium text-[var(--color-text-primary)]">更新内容</p>
+                    <div className="p-3 rounded-lg border max-h-32 overflow-y-auto bg-[var(--color-bg-input)] border-[var(--color-border)]">
+                      <p className="whitespace-pre-wrap leading-relaxed text-xs text-[var(--color-text-secondary)]">
                         {updateInfo.releaseNotes || '- 性能优化和 Bug 修复'}
                       </p>
                     </div>
@@ -142,24 +129,17 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
                 </div>
 
                 {/* 底部按钮 */}
-                <div
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px',
-                    padding: '16px 20px', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-sidebar)',
-                  }}
-                >
+                <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-[var(--color-border)] bg-[var(--color-bg-sidebar)]">
                   <button
                     onClick={() => onOpenChange(false)}
-                    className="px-4 py-2 rounded-lg transition-colors"
-                    style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-secondary)', backgroundColor: 'transparent' }}
+                    className="px-4 py-2 rounded-lg transition-colors text-xs font-medium text-[var(--color-text-secondary)] bg-transparent"
                   >
                     稍后提醒
                   </button>
                   <button
                     onClick={handleDownload}
                     disabled={downloading}
-                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white rounded-lg transition-colors"
-                    style={{ padding: '10px 20px', fontSize: 12, fontWeight: 600 }}
+                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white rounded-lg transition-colors px-5 py-2.5 text-xs font-semibold"
                   >
                     {downloading ? (
                       <>

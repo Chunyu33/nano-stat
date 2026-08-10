@@ -312,6 +312,29 @@ pub fn run() {
             update_overlay_position_cmd,
         ])
         .setup(|app| {
+            // 启动页切换：前端就绪后关闭 splash、显示主窗口（带 8s 超时兜底）
+            {
+                use tauri::Listener;
+                if let (Some(main), Some(splash)) = (
+                    app.get_webview_window("main"),
+                    app.get_webview_window("splash"),
+                ) {
+                    let main_clone = main.clone();
+                    let splash_clone = splash.clone();
+                    app.listen("main-ready", move |_| {
+                        let _ = splash_clone.close();
+                        let _ = main_clone.show();
+                        let _ = main_clone.set_focus();
+                    });
+                    // 兜底：8 秒后仍未收到就绪事件也切换（防止 splash 卡死）
+                    std::thread::spawn(move || {
+                        std::thread::sleep(std::time::Duration::from_secs(8));
+                        let _ = splash.close();
+                        let _ = main.show();
+                    });
+                }
+            }
+
             // 启动 LHM 温度采集桥接进程（懒加载；驱动可选，未安装时自动回退 WMI）
             hardware::lhm::ensure_bridge(app.handle());
             // 启动 ETW FPS 监听（无注入；需要管理员权限）

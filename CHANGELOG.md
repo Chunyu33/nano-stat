@@ -54,6 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fills the full width; the preview keeps a fixed font size (only position / display items / opacity
   are synced), so it never overflows and stays tidy.
 - Update dialog now follows the app theme (was hardcoded dark).
+- **Splash screen** — a themed startup page (gradient animation, follows dark/light theme from
+  `nanostat-theme` storage + system preference) is shown while the main window loads in the
+  background; the main window is hidden until React finishes first paint, eliminating the
+  startup white flash. Falls back to the main window after 8 s.
 
 ### Fixed
 

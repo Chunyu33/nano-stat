@@ -2197,6 +2197,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "nanostat"
+version = "1.1.0"
+dependencies = [
+ "chrono",
+ "dirs 5.0.1",
+ "nvml-wrapper",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "sysinfo",
+ "systemstat",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "tauri-plugin-updater",
+ "tokio",
+ "windows 0.59.0",
+ "windows-sys 0.59.0",
+ "wmi",
+]
+
+[[package]]
 name = "ndk"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4024,28 +4046,6 @@ dependencies = [
  "webview2-com",
  "window-vibrancy",
  "windows 0.61.3",
-]
-
-[[package]]
-name = "tauri-app"
-version = "1.1.0"
-dependencies = [
- "chrono",
- "dirs 5.0.1",
- "nvml-wrapper",
- "once_cell",
- "serde",
- "serde_json",
- "sysinfo",
- "systemstat",
- "tauri",
- "tauri-build",
- "tauri-plugin-opener",
- "tauri-plugin-updater",
- "tokio",
- "windows 0.59.0",
- "windows-sys 0.59.0",
- "wmi",
 ]
 
 [[package]]

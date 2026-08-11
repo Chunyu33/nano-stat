@@ -64,8 +64,6 @@ jobs:
       - name: 安装前端依赖
         run: npm ci
 
-      - name: 发布 lhm-bridge（NativeAOT 单文件）
-        run: dotnet publish src-tauri/lhm-bridge/lhm-bridge.csproj -c Release -r win-x64 --self-contained true -p:PublishAot=true
 
       - name: 构建安装包并创建 Release（自动签名 + 生成 latest.json）
         uses: tauri-apps/tauri-action@v0
@@ -115,8 +113,6 @@ jobs:
       - name: 安装前端依赖
         run: npm ci
 
-      - name: 发布 lhm-bridge（NativeAOT 单文件）
-        run: dotnet publish src-tauri/lhm-bridge/lhm-bridge.csproj -c Release -r win-x64 --self-contained true -p:PublishAot=true
 
       - name: 构建（不打包，仅产出 exe + 资源）
         run: npx tauri build --no-bundle
@@ -210,8 +206,6 @@ jobs:
       - name: 安装前端依赖
         run: npm ci
 
-      - name: 发布 lhm-bridge（NativeAOT 单文件）
-        run: dotnet publish src-tauri/lhm-bridge/lhm-bridge.csproj -c Release -r win-x64 --self-contained true -p:PublishAot=true
 
       - name: 构建 WebView2 捆绑安装包（embedBootstrapper，只构建不上传）
         uses: tauri-apps/tauri-action@v0

@@ -60,6 +60,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **lhm-bridge popup console window** — the temperature sidecar is a console-subsystem exe, so
+  launching it from the GUI app opened a stray cmd window. Fixed on both layers: Rust launches
+  the bridge with `CREATE_NO_WINDOW`, and the bridge itself now builds as a Windows GUI
+  subsystem (`WinExe`) executable (with a try/catch around `Console.OutputEncoding` for the
+  no-console case; stdout piped JSON still works).
 - **lhm-bridge resource missing on fresh checkout** — `bundle.resources` references the
   NativeAOT `lhm-bridge.exe`, whose `bin/` output is git-ignored, so `tauri dev/build` failed
   with "resource path doesn't exist" on a new clone. `beforeDevCommand` / `beforeBuildCommand`

@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 # Tauri 生成目录（含本地密钥对，勿提交）
-.tauri/
+.tauri/*.key
 
 # .NET build artifacts (lhm-bridge)
 src-tauri/lhm-bridge/bin/

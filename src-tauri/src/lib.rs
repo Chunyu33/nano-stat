@@ -79,6 +79,17 @@ fn is_lhm_driver_missing() -> bool {
     hardware::lhm::is_driver_missing()
 }
 
+/// 判断是否为便携版（exe 同目录存在 portable.txt 标记文件）
+/// 便携版不进行自动检查更新，也不内置安装器更新
+#[tauri::command]
+fn is_portable() -> bool {
+    std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(|dir| dir.join("portable.txt")))
+        .map(|flag| flag.exists())
+        .unwrap_or(false)
+}
+
 /// 获取当前监控设置
 #[tauri::command]
 fn get_monitor_settings() -> MonitorSettings {
@@ -301,10 +312,12 @@ fn update_overlay_position(window: &tauri::WebviewWindow, position: &MonitorPosi
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             get_hardware_overview,
             get_realtime_stats,
             is_lhm_driver_missing,
+            is_portable,
             get_monitor_settings,
             update_monitor_settings,
             show_overlay_window,

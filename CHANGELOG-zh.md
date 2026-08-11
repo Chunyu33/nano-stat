@@ -5,9 +5,7 @@
 格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [Unreleased]（未发布）
-
-## [1.1.0] - 2026-08-08
+## [1.1.0] - 2026-08-11
 
 ### 新增
 

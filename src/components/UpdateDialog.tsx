@@ -1,18 +1,19 @@
 /**
- * 更新弹窗组件
- * 检测到新版本时显示更新引导
+ * 更新弹窗组件 + 更新检查 Hook
+ * 通过 tauri-plugin-updater 检查/下载/安装更新（自动校验签名）
+ * 便携版（exe 旁有 portable.txt）不进行自动检查更新
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Sparkles } from 'lucide-react';
-import { getVersion } from '@tauri-apps/api/app';
+import { X, Download, Sparkles, Package } from 'lucide-react';
+import { check, type Update } from '@tauri-apps/plugin-updater';
+import { isPortable } from '../api/hardware';
 
 interface UpdateInfo {
   version: string;
   releaseNotes: string;
-  downloadUrl: string;
 }
 
 interface UpdateDialogProps {
@@ -22,6 +23,12 @@ interface UpdateDialogProps {
   onOpenChange: (open: boolean) => void;
   /** 更新信息 */
   updateInfo: UpdateInfo | null;
+  /** 是否便携版（便携版提示手动下载，不内置安装） */
+  portable?: boolean;
+  /** 点击"立即更新"回调（下载并安装） */
+  onInstall?: () => Promise<void>;
+  /** 安装中状态 */
+  installing?: boolean;
 }
 
 /** 遮罩层动画 */
@@ -40,27 +47,7 @@ const contentMotion = {
   transition: { duration: 0.2, ease: 'easeOut' as const },
 };
 
-export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogProps) {
-  const [downloading, setDownloading] = useState(false);
-  const [currentVersion, setCurrentVersion] = useState('1.0.0');
-
-  // 获取当前版本号（动态读取，避免硬编码不同步）
-  useEffect(() => {
-    getVersion().then(v => setCurrentVersion(v)).catch(() => {});
-  }, []);
-
-  const handleDownload = () => {
-    if (updateInfo?.downloadUrl) {
-      setDownloading(true);
-      // 打开下载链接
-      window.open(updateInfo.downloadUrl, '_blank');
-      setTimeout(() => {
-        setDownloading(false);
-        onOpenChange(false);
-      }, 1000);
-    }
-  };
-
+export function UpdateDialog({ open, onOpenChange, updateInfo, portable, onInstall, installing }: UpdateDialogProps) {
   if (!updateInfo) return null;
 
   return (
@@ -106,7 +93,7 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
                     </div>
                     <div className="text-right">
                       <p className="mb-1 text-xs text-[var(--color-text-muted)]">当前版本</p>
-                      <p className="text-sm text-[var(--color-text-secondary)]">v{currentVersion}</p>
+                      <p className="text-sm text-[var(--color-text-secondary)]">--</p>
                     </div>
                   </div>
 
@@ -123,7 +110,7 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
                   {/* 提示 */}
                   <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg mb-4">
                     <p className="text-xs text-cyan-400">
-                      建议更新到最新版本以获得更好的体验和新功能。
+                      建议更新到最新版本以获得更好的体验和新功能。更新包已签名校验，安全可靠。
                     </p>
                   </div>
                 </div>
@@ -136,23 +123,43 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
                   >
                     稍后提醒
                   </button>
-                  <button
-                    onClick={handleDownload}
-                    disabled={downloading}
-                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white rounded-lg transition-colors px-5 py-2.5 text-xs font-semibold"
-                  >
-                    {downloading ? (
-                      <>
-                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>下载中...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-3.5 h-3.5" />
-                        <span>立即更新</span>
-                      </>
-                    )}
-                  </button>
+                  {portable ? (
+                    <button
+                      onClick={onInstall}
+                      disabled={installing}
+                      className="flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white rounded-lg transition-colors px-5 py-2.5 text-xs font-semibold"
+                    >
+                      {installing ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>跳转中...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Package className="w-3.5 h-3.5" />
+                          <span>前往下载页</span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={onInstall}
+                      disabled={installing}
+                      className="flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white rounded-lg transition-colors px-5 py-2.5 text-xs font-semibold"
+                    >
+                      {installing ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>下载中...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-3.5 h-3.5" />
+                          <span>立即更新</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </motion.div>
             </Dialog.Content>
@@ -163,69 +170,90 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
   );
 }
 
-// 语义化版本比较：a > b 返回 1，a < b 返回 -1，相等返回 0
-// 支持 "v1.0.0" / "1.0.0" / "1.0.0-beta" 等常见格式（预发布后缀按 0 处理）
-function compareVersions(a: string, b: string): number {
-  const parse = (v: string) =>
-    v.replace(/^v/i, '').split(/[-+]/)[0].split('.').map(n => parseInt(n, 10) || 0);
-  const pa = parse(a);
-  const pb = parse(b);
-  const len = Math.max(pa.length, pb.length);
-  for (let i = 0; i < len; i++) {
-    const na = pa[i] ?? 0;
-    const nb = pb[i] ?? 0;
-    if (na > nb) return 1;
-    if (na < nb) return -1;
-  }
-  return 0;
-}
-
-// 检查更新的 Hook
+/**
+ * 更新检查 Hook
+ * - 自动检查：非便携版启动 3 秒后检查一次
+ * - 手动检查：checkForUpdates()（返回是否发现新版本）
+ * - 安装：installUpdate()（下载并安装，安装器模式）
+ * 便携版：跳过自动检查，安装时跳转 GitHub Releases 下载页
+ */
 export function useUpdateChecker() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [installing, setInstalling] = useState(false);
+  const [isPortableMode, setIsPortableMode] = useState(false);
+  const updateRef = useRef<Update | null>(null);
 
-  const checkForUpdates = async () => {
+  // 执行检查（auto=true 为自动检查，失败静默；手动检查失败抛给调用方提示）
+  const performCheck = useCallback(async (auto: boolean): Promise<boolean> => {
+    if (isPortableMode) return false;
+    setChecking(true);
     try {
-      // 获取当前应用版本（与 tauri.conf.json 保持一致，避免硬编码不同步）
-      const currentVersion = await getVersion();
-      // 这里可以替换为实际的更新检查 API
-      // 示例：从 GitHub Releases 获取最新版本
-      const response = await fetch(
-        'https://api.github.com/repos/Chunyu33/nano-stat/releases/latest',
-        { headers: { 'Accept': 'application/vnd.github.v3+json' } }
-      );
-      
-      if (response.ok) {
-        const data = await response.json();
-        const latestVersion = data.tag_name?.replace('v', '') || '';
-        
-        // 语义化版本比较：仅当远端版本确实比当前版本新才提示更新
-        // （避免远端 tag 比本地旧时误报，如本地 1.0.1 遇到远端 v1.0.0）
-        if (latestVersion && compareVersions(latestVersion, currentVersion) > 0) {
-          setUpdateInfo({
-            version: latestVersion,
-            releaseNotes: data.body || '',
-            downloadUrl: data.html_url || '',
-          });
-          setShowDialog(true);
-        }
+      const update = await check();
+      if (update) {
+        updateRef.current = update;
+        setUpdateInfo({ version: update.version, releaseNotes: update.body || '- 性能优化和 Bug 修复' });
+        setShowDialog(true);
+        return true;
       }
+      return false;
     } catch (err) {
       console.log('Update check failed:', err);
+      if (auto) return false;
+      throw err;
+    } finally {
+      setChecking(false);
     }
-  };
+  }, [isPortableMode]);
 
+  // 启动时检测便携版 + 自动检查（非便携版延迟 3 秒）
   useEffect(() => {
-    // 启动时检查更新（延迟 3 秒）
-    const timer = setTimeout(checkForUpdates, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    let cancelled = false;
+    let timer: number | undefined;
+    isPortable().then(p => {
+      if (cancelled) return;
+      setIsPortableMode(p);
+      if (!p) {
+        timer = window.setTimeout(() => {
+          performCheck(true).catch(() => {});
+        }, 3000);
+      }
+    });
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [performCheck]);
+
+  // 安装更新（安装版：下载并安装；便携版：跳转 GitHub Releases 下载页）
+  const installUpdate = useCallback(async (): Promise<void> => {
+    if (isPortableMode) {
+      // 便携版无内置更新，跳转 GitHub Releases 页面手动下载
+      window.open('https://github.com/Chunyu33/nano-stat/releases/latest', '_blank');
+      setShowDialog(false);
+      return;
+    }
+    if (!updateRef.current) return;
+    setInstalling(true);
+    try {
+      await updateRef.current.downloadAndInstall();
+      // 安装完成后应用会自动重启（Tauri updater 默认行为）
+    } catch (err) {
+      console.log('Install failed:', err);
+    } finally {
+      setInstalling(false);
+    }
+  }, [isPortableMode]);
 
   return {
     updateInfo,
     showDialog,
     setShowDialog,
-    checkForUpdates,
+    checkForUpdates: () => performCheck(false),
+    checking,
+    installing,
+    installUpdate,
+    isPortableMode,
   };
 }

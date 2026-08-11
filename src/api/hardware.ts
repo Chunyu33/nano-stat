@@ -31,6 +31,14 @@ export async function isLhmDriverMissing(): Promise<boolean> {
 }
 
 /**
+ * 判断是否为便携版（exe 同目录存在 portable.txt 标记文件）
+ * 便携版不进行自动检查更新
+ */
+export async function isPortable(): Promise<boolean> {
+  return await invoke<boolean>('is_portable');
+}
+
+/**
  * 获取监控设置
  * @returns 当前监控设置
  */

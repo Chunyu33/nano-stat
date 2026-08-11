@@ -17,6 +17,19 @@ pub struct HardwareOverview {
     pub disks: Vec<DiskInfo>,
     /// 网络信息
     pub network: NetworkInfo,
+    /// 显示器信息（当前分辨率与刷新率）
+    pub display: DisplayInfo,
+}
+
+/// 显示器信息
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct DisplayInfo {
+    /// 当前分辨率宽度 (物理像素)
+    pub width: u32,
+    /// 当前分辨率高度 (物理像素)
+    pub height: u32,
+    /// 当前刷新率 (Hz)
+    pub refresh_rate: u32,
 }
 
 /// CPU 详细信息
@@ -138,6 +151,10 @@ pub struct RealtimeStats {
     pub memory_usage: f32,
     /// 网络统计
     pub network_stats: NetworkStats,
+    /// 前台是否检测到游戏（全屏窗口）
+    pub is_game_active: bool,
+    /// 游戏帧率 (FPS，ETW 采集；非游戏或无权限时为 None)
+    pub fps: Option<f64>,
     /// 时间戳
     pub timestamp: i64,
 }
@@ -166,6 +183,8 @@ pub struct MonitorSettings {
     pub refresh_interval: u32,
     /// 透明度 (0-100)
     pub opacity: u8,
+    /// 面板文字大小 (px, 10-20)
+    pub font_size: u8,
 }
 
 /// 监控面板位置
@@ -179,6 +198,14 @@ pub enum MonitorPosition {
     LeftCenter,
     /// 右侧中间
     RightCenter,
+    /// 左上角
+    TopLeft,
+    /// 右上角
+    TopRight,
+    /// 左下角
+    BottomLeft,
+    /// 右下角
+    BottomRight,
 }
 
 impl Default for MonitorPosition {
@@ -228,6 +255,7 @@ impl Default for MonitorSettings {
             display_items: DisplayItems::default(),
             refresh_interval: 1000,
             opacity: 80,
+            font_size: 12,
         }
     }
 }

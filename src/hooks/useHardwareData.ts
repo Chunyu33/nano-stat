@@ -43,6 +43,8 @@ export function useHardwareData(refreshInterval = 1000): UseHardwareDataResult {
   const intervalRef = useRef<number | null>(null);
 
   // 获取硬件概览数据
+  // 说明：概览中的静态信息（型号、容量等）不需要高频刷新，
+  // 只在首次加载和手动刷新时获取；实时使用率走 fetchRealtime
   const fetchOverview = useCallback(async () => {
     try {
       const data = await getHardwareOverview();
@@ -87,9 +89,8 @@ export function useHardwareData(refreshInterval = 1000): UseHardwareDataResult {
     // 初始加载
     refresh();
 
-    // 设置定时刷新
+    // 定时刷新：只拉取实时数据（概览静态信息仅在手动刷新时更新）
     intervalRef.current = window.setInterval(() => {
-      fetchOverview();
       fetchRealtime();
     }, refreshInterval);
 
@@ -98,7 +99,7 @@ export function useHardwareData(refreshInterval = 1000): UseHardwareDataResult {
         clearInterval(intervalRef.current);
       }
     };
-  }, [refresh, fetchOverview, fetchRealtime, refreshInterval]);
+  }, [refresh, fetchRealtime, refreshInterval]);
 
   return {
     overview,

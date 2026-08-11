@@ -1,6 +1,6 @@
 [package]
 name = "tauri-app"
-version = "0.1.0"
+version = "1.1.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -20,6 +20,7 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-opener = "2"
+tauri-plugin-updater = "2"
 # 配置文件目录
 dirs = "5"
 serde = { version = "1", features = ["derive"] }
@@ -34,6 +35,18 @@ tokio = { version = "1", features = ["full"] }
 nvml-wrapper = "0.10"
 # Windows WMI 支持 (用于 AMD/Intel 集显)
 wmi = "0.14"
+# Windows API（前台窗口检测等）
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Graphics_Gdi",
+] }
+# Windows API（ETW 事件跟踪，用于 FPS 采集）
+windows = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_System_Diagnostics_Etw",
+    "Win32_System_Time",
+] }
 # 时间处理
 chrono = "0.4"
 # 延迟初始化

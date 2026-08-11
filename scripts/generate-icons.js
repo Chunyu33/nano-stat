@@ -16,11 +16,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const iconsDir = path.join(__dirname, '../src-tauri/icons');
+const publicIconsDir = path.join(__dirname, '../public/icons');
 const svgPath = path.join(iconsDir, 'icon.svg');
 
 // Tauri 需要的图标尺寸
 const sizes = [
   { name: '32x32.png', size: 32 },
+  { name: '48x48.png', size: 48 },
   { name: '128x128.png', size: 128 },
   { name: '128x128@2x.png', size: 256 },
   { name: 'icon.png', size: 512 },
@@ -42,6 +44,7 @@ async function generateIcons() {
 
   // 读取 SVG 文件
   const svgBuffer = fs.readFileSync(svgPath);
+  fs.mkdirSync(publicIconsDir, { recursive: true });
 
   for (const { name, size } of sizes) {
     const outputPath = path.join(iconsDir, name);
@@ -52,6 +55,18 @@ async function generateIcons() {
       .toFile(outputPath);
     
     console.log(`✓ 生成 ${name} (${size}x${size})`);
+  }
+
+  // React UI 使用的公共资源与 Tauri 图标保持一致
+  for (const { name, size } of sizes.filter(({ name }) =>
+    ['32x32.png', '48x48.png', '128x128.png'].includes(name),
+  )) {
+    await sharp(svgBuffer)
+      .resize(size, size)
+      .png()
+      .toFile(path.join(publicIconsDir, name));
+
+    console.log(`✓ 同步 public/icons/${name} (${size}x${size})`);
   }
 
   console.log('\n所有图标生成完成！');

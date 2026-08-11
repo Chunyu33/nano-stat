@@ -4,8 +4,11 @@
  */
 
 import { useState, useEffect } from 'react';
+import type { CSSProperties } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import type { RealtimeStats, MonitorSettings } from '../types/hardware';
+import { formatSpeed } from '../utils/format';
 
 /** 默认设置 */
 const defaultSettings: MonitorSettings = {
@@ -22,13 +25,14 @@ const defaultSettings: MonitorSettings = {
   },
   refresh_interval: 1000,
   opacity: 80,
+  font_size: 12,
 };
 
 export function OverlayPanel() {
   const [stats, setStats] = useState<RealtimeStats | null>(null);
   const [settings, setSettings] = useState<MonitorSettings>(defaultSettings);
 
-  // 加载设置并定时刷新
+  // 加载设置并监听设置变更事件（替代原来的每秒轮询）
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -40,9 +44,13 @@ export function OverlayPanel() {
     };
     loadSettings();
     
-    // 每秒检查设置变化（用于响应位置切换）
-    const settingsInterval = setInterval(loadSettings, 1000);
-    return () => clearInterval(settingsInterval);
+    // 监听主窗口设置变更事件，实时响应（位置切换、显示项调整等）
+    const unlistenPromise = listen<MonitorSettings>('settings-changed', (event) => {
+      setSettings(event.payload);
+    });
+    return () => {
+      unlistenPromise.then(unlisten => unlisten()).catch(() => {});
+    };
   }, []);
 
   // 定时获取实时数据
@@ -65,13 +73,15 @@ export function OverlayPanel() {
     return () => clearInterval(interval);
   }, [settings.refresh_interval]);
 
-  // 判断是否为垂直布局
+  // 判断是否为垂直布局（仅左右居中位置；四角使用水平紧凑条）
   const isVertical = settings.position === 'LeftCenter' || settings.position === 'RightCenter';
 
-  // 面板样式
+  // 面板样式：透明度只作用于背景（--panel-bg-alpha），文字指标保持不透明；
+  // 文字大小通过 --panel-font-size 控制（容器尺寸由 Rust 端随字号自适应）
   const panelStyle = {
-    opacity: settings.opacity / 100,
-  };
+    '--panel-bg-alpha': settings.opacity / 100,
+    '--panel-font-size': `${settings.font_size}px`,
+  } as CSSProperties;
 
   return (
     <div
@@ -128,21 +138,23 @@ export function OverlayPanel() {
         </div>
       )}
 
-      {/* 网络速率 */}
+      {/* 网络速率（自动换算 KB/s → MB/s → GB/s） */}
       {settings.display_items.network && (
         <div className="monitor-item">
           <span className="monitor-label">网络</span>
           <span className="monitor-value text-network">
-            ↓{stats?.network_stats.download_rate.toFixed(0) ?? '--'}KB/s
+            ↓{formatSpeed(stats?.network_stats.download_rate ?? 0)}
           </span>
         </div>
       )}
 
-      {/* FPS（预留） */}
+      {/* FPS：全程显示（游戏前台为游戏帧率，非游戏为桌面整体帧率） */}
       {settings.display_items.fps && (
         <div className="monitor-item">
           <span className="monitor-label">FPS</span>
-          <span className="monitor-value text-fps">--</span>
+          <span className="monitor-value text-fps">
+            {stats?.fps != null ? stats.fps.toFixed(0) : '--'}
+          </span>
         </div>
       )}
     </div>

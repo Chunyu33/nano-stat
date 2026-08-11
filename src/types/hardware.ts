@@ -113,6 +113,18 @@ export interface HardwareOverview {
   disks: DiskInfo[];
   /** 网络信息 */
   network: NetworkInfo;
+  /** 显示器信息（当前分辨率与刷新率） */
+  display: DisplayInfo;
+}
+
+/** 显示器信息 */
+export interface DisplayInfo {
+  /** 当前分辨率宽度 (物理像素) */
+  width: number;
+  /** 当前分辨率高度 (物理像素) */
+  height: number;
+  /** 当前刷新率 (Hz) */
+  refresh_rate: number;
 }
 
 /** 网络统计数据 */
@@ -139,12 +151,24 @@ export interface RealtimeStats {
   memory_usage: number;
   /** 网络统计 */
   network_stats: NetworkStats;
+  /** 前台是否检测到游戏（全屏窗口） */
+  is_game_active: boolean;
+  /** 游戏帧率 (FPS，ETW 采集；非游戏或无权限时为 null) */
+  fps: number | null;
   /** 时间戳 */
   timestamp: number;
 }
 
 /** 监控面板位置 */
-export type MonitorPosition = 'TopCenter' | 'BottomCenter' | 'LeftCenter' | 'RightCenter';
+export type MonitorPosition =
+  | 'TopCenter'
+  | 'BottomCenter'
+  | 'LeftCenter'
+  | 'RightCenter'
+  | 'TopLeft'
+  | 'TopRight'
+  | 'BottomLeft'
+  | 'BottomRight';
 
 /** 显示项目配置 */
 export interface DisplayItems {
@@ -176,4 +200,6 @@ export interface MonitorSettings {
   refresh_interval: number;
   /** 透明度 (0-100) */
   opacity: number;
+  /** 面板文字大小 (px, 10-20) */
+  font_size: number;
 }

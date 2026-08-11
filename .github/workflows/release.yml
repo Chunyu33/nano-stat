@@ -1,0 +1,255 @@
+name: Release
+
+# 触发方式：
+# 1. 推送 tag（v1.1.0 等）自动打包
+# 2. 手动触发（Actions 页面 → Run workflow，需先推送对应 tag）
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  # 更新签名密钥（GitHub Secrets 中配置）
+  # TAURI_SIGNING_PRIVATE_KEY: 私钥文件内容（tauri signer generate 生成的 .key 文件内容）
+  # TAURI_SIGNING_PRIVATE_KEY_PASSWORD: 私钥密码
+  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+jobs:
+  # ===================== Job 1: 常规安装包（NSIS 安装器） =====================
+  # 同时负责创建 GitHub Release（draft），并生成 updater 用的 latest.json
+  # 输出真实 tag 名，供 Job 2/3 挂载同一 Release
+  installer:
+    runs-on: windows-latest
+    outputs:
+      release_tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 输出 Release tag：tag 触发用当前 tag；手动触发用 package.json 版本拼 v 前缀
+      - name: 计算 Release tag
+        id: tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == v* ]]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 安装 .NET SDK 8（lhm-bridge NativeAOT 编译）
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: 安装 Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust 缓存
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: 安装前端依赖
+        run: npm ci
+
+      - name: 发布 lhm-bridge（NativeAOT 单文件）
+        run: dotnet publish src-tauri/lhm-bridge/lhm-bridge.csproj -c Release -r win-x64 --self-contained true -p:PublishAot=true
+
+      - name: 构建安装包并创建 Release（自动签名 + 生成 latest.json）
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'NanoStat v__VERSION__'
+          releaseBody: |
+            ## NanoStat v__VERSION__
+
+            请先确认草稿内容无误后发布（Release 为 draft 状态）。
+
+            **安装包**：`NanoStat_<version>_x64-setup.exe`（含 .sig 签名文件）
+            **便携包**：`NanoStat_<version>_x64-portable.zip`（含 .sig 签名文件，免安装，不支持自动更新）
+            **WebView2 捆绑包**：`NanoStat_<version>_x64-webview2-setup.exe`（内置 WebView2 运行时，适合无网环境）
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+
+  # ===================== Job 2: 便携包（单文件 exe + 资源，压缩为 zip） =====================
+  portable:
+    runs-on: windows-latest
+    needs: installer
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 安装 .NET SDK 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: 安装 Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust 缓存
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: 安装前端依赖
+        run: npm ci
+
+      - name: 发布 lhm-bridge（NativeAOT 单文件）
+        run: dotnet publish src-tauri/lhm-bridge/lhm-bridge.csproj -c Release -r win-x64 --self-contained true -p:PublishAot=true
+
+      - name: 构建（不打包，仅产出 exe + 资源）
+        run: npx tauri build --no-bundle
+
+      - name: 组装便携包（exe + lhm-bridge 资源 + portable.txt 标记）
+        shell: bash
+        run: |
+          set -e
+          # 版本号：tag 触发取 tag（去 v 前缀）；手动触发从 package.json 兜底
+          if [[ "${GITHUB_REF_NAME}" == v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          # 便携包名含版本号
+          ZIP_NAME="NanoStat_${VERSION}_x64-portable.zip"
+
+          mkdir -p portable
+          # 主程序：动态查找（--no-bundle 产物名取决于 Cargo package name，不硬编码）
+          MAIN_EXE=$(find src-tauri/target/release -maxdepth 1 -name "*.exe" ! -name "*.dll" | head -1)
+          if [ -z "$MAIN_EXE" ]; then
+            echo "未找到主程序 exe"
+            exit 1
+          fi
+          cp "$MAIN_EXE" portable/NanoStat.exe
+          echo "主程序: $MAIN_EXE"
+
+          # lhm-bridge 资源（保留 release 目录结构，兼容 find_bridge_path 两种布局）
+          BRIDGE=$(find src-tauri/target/release -name "lhm-bridge.exe" | head -1)
+          if [ -n "$BRIDGE" ]; then
+            REL="${BRIDGE#src-tauri/target/release/}"
+            mkdir -p "portable/$(dirname "$REL")"
+            cp "$BRIDGE" "portable/$REL"
+            echo "bridge 资源: $REL"
+          else
+            echo "警告: 未找到 lhm-bridge.exe 资源"
+          fi
+
+          # 便携版标记（应用检测到该文件即不自动检查更新）
+          echo "portable" > portable/portable.txt
+
+          # 压缩为 zip（windows-latest 自带 7z，比 PowerShell 通配符更稳定）
+          cd portable
+          7z a -tzip "../${ZIP_NAME}" * > /dev/null
+          cd ..
+          ls -la "${ZIP_NAME}"
+
+          # 输出 zip 名供后续步骤使用
+          echo "ZIP_NAME=${ZIP_NAME}" >> "$GITHUB_ENV"
+
+      - name: 签名便携包（生成 .sig 签名文件）
+        shell: bash
+        run: |
+          npx tauri signer sign -k "$TAURI_SIGNING_PRIVATE_KEY" -p "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" "$ZIP_NAME"
+
+      - name: 上传便携包到 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.installer.outputs.release_tag }}
+          draft: true
+          files: |
+            ${{ env.ZIP_NAME }}
+            ${{ env.ZIP_NAME }}.sig
+
+  # ===================== Job 3: WebView2 捆绑安装包（内嵌 WebView2 运行时） =====================
+  webview2-installer:
+    runs-on: windows-latest
+    needs: installer
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 安装 .NET SDK 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: 安装 Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust 缓存
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: 安装前端依赖
+        run: npm ci
+
+      - name: 发布 lhm-bridge（NativeAOT 单文件）
+        run: dotnet publish src-tauri/lhm-bridge/lhm-bridge.csproj -c Release -r win-x64 --self-contained true -p:PublishAot=true
+
+      - name: 构建 WebView2 捆绑安装包（embedBootstrapper，只构建不上传）
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          createRelease: false
+          includeUpdaterJson: false
+          args: >-
+            --config
+            {"bundle":{"windows":{"webviewInstallMode":{"type":"embedBootstrapper"}}}}
+
+      - name: 重命名并签名 WebView2 捆绑安装包
+        shell: bash
+        run: |
+          set -e
+          # 版本号：tag 触发取 tag（去 v 前缀）；手动触发从 package.json 兜底
+          if [[ "${GITHUB_REF_NAME}" == v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          NEW_NAME="NanoStat_${VERSION}_x64-webview2-setup.exe"
+          SETUP=$(find src-tauri/target/release/bundle -name "*-setup.exe" | head -1)
+          if [ -z "$SETUP" ]; then
+            echo "未找到 NSIS 安装包"
+            exit 1
+          fi
+          cp "$SETUP" "$NEW_NAME"
+          # 重新签名（重命名后文件名需与签名文件匹配）
+          npx tauri signer sign -k "$TAURI_SIGNING_PRIVATE_KEY" -p "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" "$NEW_NAME"
+          echo "NEW_NAME=${NEW_NAME}" >> "$GITHUB_ENV"
+
+      - name: 上传 WebView2 捆绑包到 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.installer.outputs.release_tag }}
+          draft: true
+          files: |
+            ${{ env.NEW_NAME }}
+            ${{ env.NEW_NAME }}.sig

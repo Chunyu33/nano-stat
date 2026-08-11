@@ -11,6 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
+# Tauri 生成目录（含本地密钥对，勿提交）
+.tauri/*.key
+
+# .NET build artifacts (lhm-bridge)
+src-tauri/lhm-bridge/bin/
+src-tauri/lhm-bridge/obj/
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +28,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+/temp

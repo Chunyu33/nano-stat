@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "NanoStat",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "identifier": "com.nanostat.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -21,7 +21,20 @@
         "center": true,
         "decorations": false,
         "transparent": false,
-        "resizable": true
+        "resizable": true,
+        "visible": false
+      },
+      {
+        "label": "splash",
+        "title": "NanoStat",
+        "width": 1380,
+        "height": 800,
+        "center": true,
+        "decorations": false,
+        "transparent": false,
+        "resizable": false,
+        "alwaysOnTop": true,
+        "url": "splash.html"
       }
     ],
     "security": {
@@ -31,12 +44,33 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
+    "resources": [
+      "lhm-bridge/bin/Release/net8.0/win-x64/publish/lhm-bridge.exe"
+    ],
     "icon": [
       "icons/32x32.png",
+      "icons/48x48.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ5NDg0N0Y1MEM1Njk2NTgKUldSWWxsWU05VWRJU2VwWnF6RWFOWE1uNjRkM2JsTTg3VTJlRU9lQ1ZMbERSN24rYW50TjF0OFQK",
+      "endpoints": [
+        "https://github.com/Chunyu33/nano-stat/releases/latest/download/latest.json"
+      ]
+    }
   }
 }

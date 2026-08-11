@@ -13,6 +13,9 @@
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
+// Windows 扩展：creation_flags（隐藏子进程控制台窗口）
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use once_cell::sync::Lazy;
@@ -102,6 +105,9 @@ pub fn ensure_bridge(app: &tauri::AppHandle) {
         .stdin(Stdio::piped()) // 保持 stdin 打开，父进程退出时 bridge 检测到 EOF 自行退出
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
+        // 隐藏子进程控制台窗口：bridge 是控制台子系统程序，
+        // GUI 父进程（NanoStat）启动它时默认会新建 cmd 窗口，这里用 CREATE_NO_WINDOW 阻止
+        .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
         .spawn()
     else {
         return;

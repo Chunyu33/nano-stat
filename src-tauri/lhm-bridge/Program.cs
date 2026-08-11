@@ -62,7 +62,16 @@ class Program
     {
         onceMode = args.Contains("--once");
         debugMode = args.Contains("--debug");
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        // WinExe 子系统（无控制台）下设置 OutputEncoding 会抛"句柄无效"，
+        // 此时 stdout 仍可写入管道（Rust 端 piped 读取），跳过编码设置即可
+        try
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+        }
+        catch (IOException)
+        {
+            // 无控制台句柄（GUI 子系统 / 隐藏窗口），忽略
+        }
 
         // 检测 PawnIO 内核驱动是否已安装（CPU/主板温度读取的前提）
         if (!LibreHardwareMonitor.PawnIo.PawnIo.IsInstalled)

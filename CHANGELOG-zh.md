@@ -55,6 +55,10 @@
 
 ### 修复
 
+- **lhm-bridge 弹出命令行窗口** —— 温度采集子进程是控制台子系统程序，GUI 应用启动它时会
+  弹出多余 cmd 窗口。双层修复：Rust 端用 `CREATE_NO_WINDOW` 启动；bridge 自身改为 Windows
+  GUI 子系统（`WinExe`）编译（`Console.OutputEncoding` 加 try/catch 兼容无控制台场景，
+  stdout 管道 JSON 输出不受影响）。
 - **显示器信息硬编码** —— 硬件概览页之前写死 `1920×1080 / 165Hz`，与实际显示器无关。
   现通过 Win32 `EnumDisplaySettingsW(ENUM_CURRENT_SETTINGS)` 实时查询（新增 `display.rs`），
   分辨率与刷新率始终反映当前显示器（实测：2560×1440 @ 144Hz）。

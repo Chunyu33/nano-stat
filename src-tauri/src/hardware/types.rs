@@ -143,18 +143,40 @@ pub struct RealtimeStats {
     pub cpu_usage: f32,
     /// CPU 温度
     pub cpu_temp: Option<f32>,
+    /// CPU 当前频率 (MHz)
+    pub cpu_frequency: Option<u64>,
     /// GPU 使用率 (0-100)
     pub gpu_usage: f32,
     /// GPU 温度
     pub gpu_temp: Option<f32>,
+    /// GPU 核心频率 (MHz)
+    pub gpu_clock: Option<u32>,
+    /// GPU 功耗 (W)
+    pub gpu_power: Option<f32>,
+    /// 显存已用 (MB)
+    pub vram_used: Option<u64>,
+    /// 显存总量 (MB)
+    pub vram_total: Option<u64>,
     /// 内存使用率 (0-100)
     pub memory_usage: f32,
+    /// 内存已用 (MB)
+    pub memory_used: u64,
+    /// 内存总量 (MB)
+    pub memory_total: u64,
     /// 网络统计
     pub network_stats: NetworkStats,
+    /// 磁盘读速率 (MB/s)
+    pub disk_read_rate: Option<f64>,
+    /// 磁盘写速率 (MB/s)
+    pub disk_write_rate: Option<f64>,
     /// 前台是否检测到游戏（全屏窗口）
     pub is_game_active: bool,
     /// 游戏帧率 (FPS，ETW 采集；非游戏或无权限时为 None)
     pub fps: Option<f64>,
+    /// 1% Low FPS（帧时间 99 百分位换算；仅游戏前台且有足够帧数时有效）
+    pub fps_1pct: Option<f64>,
+    /// 平均帧时间 (ms)
+    pub frame_time: Option<f64>,
     /// 时间戳
     pub timestamp: i64,
 }
@@ -231,6 +253,24 @@ pub struct DisplayItems {
     pub network: bool,
     /// 显示帧率
     pub fps: bool,
+    /// 显示 1% Low FPS（帧时间 99 百分位换算）
+    #[serde(default)]
+    pub fps_1pct: bool,
+    /// 显示显存占用（已用/总量）
+    #[serde(default)]
+    pub vram: bool,
+    /// 显示磁盘读写速率
+    #[serde(default)]
+    pub disk: bool,
+    /// 显示 CPU 频率
+    #[serde(default)]
+    pub cpu_freq: bool,
+    /// 显示 GPU 频率
+    #[serde(default)]
+    pub gpu_freq: bool,
+    /// 显示 GPU 功耗
+    #[serde(default)]
+    pub gpu_power: bool,
 }
 
 impl Default for DisplayItems {
@@ -243,6 +283,13 @@ impl Default for DisplayItems {
             memory: true,
             network: true,
             fps: false,
+            // 游戏加加核心指标默认开启（频率/功耗默认关，避免悬浮窗过长）
+            fps_1pct: true,
+            vram: true,
+            disk: true,
+            cpu_freq: false,
+            gpu_freq: false,
+            gpu_power: false,
         }
     }
 }

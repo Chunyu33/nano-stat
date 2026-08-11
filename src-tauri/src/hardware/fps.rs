@@ -16,6 +16,7 @@
 //! 注意：ETW 实时监听需要管理员权限（或 Performance Log Users 组成员）。
 
 use std::ffi::c_void;
+use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
@@ -60,6 +61,10 @@ struct FpsShared {
     target_pid: AtomicU32,
     /// 最近结算的 FPS（由结算线程写入，读取线程消费）
     last_fps: Mutex<Option<f64>>,
+    /// 最近结算的 1% Low FPS（帧时间 99 百分位换算）
+    last_fps_1pct: Mutex<Option<f64>>,
+    /// 最近结算的平均帧时间 (ms)
+    last_frame_time: Mutex<Option<f64>>,
 }
 
 impl FpsShared {
@@ -68,6 +73,8 @@ impl FpsShared {
             present_count: AtomicU64::new(0),
             target_pid: AtomicU32::new(0),
             last_fps: Mutex::new(None),
+            last_fps_1pct: Mutex::new(None),
+            last_frame_time: Mutex::new(None),
         }
     }
 }
@@ -80,6 +87,15 @@ static STARTED: AtomicBool = AtomicBool::new(false);
 static WINDOW_START: Lazy<Mutex<Instant>> = Lazy::new(|| Mutex::new(Instant::now()));
 /// 前台进程连续无帧的结算次数（超过阈值自动回退统计所有进程）
 static ZERO_FRAME_COUNT: AtomicU32 = AtomicU32::new(0);
+
+/// 帧时间戳环形缓冲上限（约 34 秒 @60fps，覆盖 1% Low 统计窗口）
+const MAX_FRAME_SAMPLES: usize = 2048;
+/// 计算 1% Low 所需的最少帧数（帧太少时百分位无统计意义）
+const MIN_FRAME_SAMPLES: usize = 20;
+
+/// 目标进程的帧时间戳环形缓冲（Instant，Windows 底层即 QPC，由 ETW 回调写入）
+/// 只记录通过 PID 过滤后的帧，保证 1% Low 只反映目标进程（游戏）的帧率波动
+static FRAME_TIMESTAMPS: Lazy<Mutex<VecDeque<Instant>>> = Lazy::new(|| Mutex::new(VecDeque::new()));
 
 /// ETW 事件回调（在 ProcessTrace 的线程上执行，要求极快返回）
 unsafe extern "system" fn on_event(record: *mut EVENT_RECORD) {
@@ -111,6 +127,15 @@ unsafe extern "system" fn on_event(record: *mut EVENT_RECORD) {
     }
 
     shared.present_count.fetch_add(1, Ordering::Relaxed);
+
+    // 记录帧时间戳（Instant 底层是 QPC，开销 ~20ns，每帧一次可忽略）：
+    // 回调要求极快返回，这里只做一次环形缓冲追加（满则丢弃最旧一帧）
+    if let Ok(mut stamps) = FRAME_TIMESTAMPS.lock() {
+        if stamps.len() >= MAX_FRAME_SAMPLES {
+            stamps.pop_front();
+        }
+        stamps.push_back(Instant::now());
+    }
 }
 
 /// 设置目标进程（前台游戏），None 表示统计所有进程的 Present
@@ -121,6 +146,10 @@ pub fn set_target_pid(pid: Option<u32>) {
         SHARED.present_count.store(0, Ordering::Relaxed);
         *WINDOW_START.lock().unwrap() = Instant::now();
         *SHARED.last_fps.lock().unwrap() = None;
+        *SHARED.last_fps_1pct.lock().unwrap() = None;
+        *SHARED.last_frame_time.lock().unwrap() = None;
+        // 帧时间戳缓冲随目标进程切换清空，防止跨进程帧混入 1% Low 统计
+        FRAME_TIMESTAMPS.lock().unwrap().clear();
     }
 }
 
@@ -160,6 +189,71 @@ pub fn settle_fps() {
     } else {
         ZERO_FRAME_COUNT.store(0, Ordering::Relaxed);
     }
+
+    // 帧时间统计：仅目标进程明确（游戏前台，未回退）时计算 1% Low / 平均帧时间。
+    // 回退为统计所有进程时缓冲混入桌面帧，1% Low 无意义，置 None。
+    if target != 0 {
+        let (fps_1pct, frame_time) = compute_frame_stats();
+        *SHARED.last_fps_1pct.lock().unwrap() = fps_1pct;
+        *SHARED.last_frame_time.lock().unwrap() = frame_time;
+    } else {
+        *SHARED.last_fps_1pct.lock().unwrap() = None;
+        *SHARED.last_frame_time.lock().unwrap() = None;
+    }
+}
+
+/// 从帧时间戳缓冲计算 1% Low FPS 与平均帧时间 (ms)
+///
+/// 1% Low 定义（PresentMon 惯例）：帧时间升序排序后取 99 百分位
+/// （即最慢的 1% 帧的帧时间），再换算为 FPS = 1000 / 帧时间。
+/// 帧数不足或帧时间异常（≤0.5ms 或 ≥1000ms）时返回 None。
+fn compute_frame_stats() -> (Option<f64>, Option<f64>) {
+    let stamps = FRAME_TIMESTAMPS.lock().unwrap();
+    if stamps.len() < MIN_FRAME_SAMPLES {
+        return (None, None);
+    }
+
+    // 相邻帧间隔 → 毫秒（Instant 差值）
+    let mut diffs: Vec<f64> = stamps
+        .iter()
+        .zip(stamps.iter().skip(1))
+        .map(|(&a, &b)| b.duration_since(a).as_secs_f64() * 1000.0)
+        .collect();
+
+    if diffs.len() < MIN_FRAME_SAMPLES {
+        return (None, None);
+    }
+
+    // 平均帧时间：窗口总时长 / 帧间隔数（与 FPS 互为倒数，口径一致）
+    let avg_ms = diffs.iter().sum::<f64>() / diffs.len() as f64;
+
+    // 99 百分位帧时间：升序排序后取 99% 分位索引（最慢的 1% 帧）
+    diffs.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let idx = ((diffs.len() as f64) * 0.99).ceil() as usize - 1;
+    let p99_ms = diffs[idx.min(diffs.len() - 1)];
+
+    let fps_1pct = if p99_ms > 0.5 && p99_ms < 1000.0 {
+        Some(1000.0 / p99_ms)
+    } else {
+        None
+    };
+    let frame_time = if avg_ms > 0.0 && avg_ms < 1000.0 {
+        Some(avg_ms)
+    } else {
+        None
+    };
+
+    (fps_1pct, frame_time)
+}
+
+/// 获取最近结算的 1% Low FPS
+pub fn get_fps_1pct() -> Option<f64> {
+    *SHARED.last_fps_1pct.lock().unwrap()
+}
+
+/// 获取最近结算的平均帧时间 (ms)
+pub fn get_frame_time() -> Option<f64> {
+    *SHARED.last_frame_time.lock().unwrap()
 }
 
 /// 启动 ETW FPS 监听（幂等）

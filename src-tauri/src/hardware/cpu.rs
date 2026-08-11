@@ -72,6 +72,15 @@ pub fn get_cpu_usage(sys: &System) -> f32 {
     sys.global_cpu_usage()
 }
 
+/// 获取当前 CPU 频率（MHz，所有核心平均，与概览页口径一致）
+pub fn get_cpu_frequency(sys: &System) -> Option<u64> {
+    let cpus = sys.cpus();
+    if cpus.is_empty() {
+        return None;
+    }
+    Some(cpus.iter().map(|cpu| cpu.frequency()).sum::<u64>() / cpus.len() as u64)
+}
+
 /// 获取 CPU 温度
 /// 
 /// 优先级：

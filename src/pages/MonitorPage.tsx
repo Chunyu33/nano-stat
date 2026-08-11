@@ -6,7 +6,7 @@
 import { Monitor, Settings, RefreshCw, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight } from 'lucide-react';
 import { useMonitorSettings } from '../hooks/useMonitorSettings';
 import { useHardwareData } from '../hooks/useHardwareData';
-import { formatSpeed } from '../utils/format';
+import { formatSpeed, formatGb, formatDiskRate } from '../utils/format';
 import type { MonitorPosition } from '../types/hardware';
 
 /** 位置图标映射 */
@@ -133,7 +133,10 @@ export function MonitorPage() {
               {settings.display_items.memory && (
                 <div className="flex items-center gap-0.5">
                   <span className="text-[#9ca3af]">内存</span>
-                  <span className="font-bold text-[#a855f7]">{realtime?.memory_usage.toFixed(0) || '--'}%</span>
+                  <span className="font-bold text-[#a855f7]">
+                    {realtime?.memory_usage.toFixed(0) || '--'}%
+                    {realtime ? ` ${formatGb(realtime.memory_used)}/${formatGb(realtime.memory_total)}` : ''}
+                  </span>
                 </div>
               )}
               {settings.display_items.network && (
@@ -146,6 +149,55 @@ export function MonitorPage() {
                 <div className="flex items-center gap-0.5">
                   <span className="text-[#9ca3af]">FPS</span>
                   <span className="font-bold text-[#eab308]">{realtime?.fps != null ? realtime.fps.toFixed(0) : '--'}</span>
+                </div>
+              )}
+              {settings.display_items.fps_1pct && (
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[#9ca3af]">1%Low</span>
+                  <span className="font-bold text-[#eab308]">{realtime?.fps_1pct != null ? realtime.fps_1pct.toFixed(0) : '--'}</span>
+                </div>
+              )}
+              {settings.display_items.vram && (
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[#9ca3af]">显存</span>
+                  <span className="font-bold text-[#10b981]">
+                    {realtime?.vram_used != null && realtime?.vram_total != null
+                      ? `${formatGb(realtime.vram_used)}/${formatGb(realtime.vram_total)}`
+                      : '--'}
+                  </span>
+                </div>
+              )}
+              {settings.display_items.disk && (
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[#9ca3af]">磁盘</span>
+                  <span className="font-bold text-[#3b82f6]">
+                    ↓{realtime?.disk_read_rate != null ? formatDiskRate(realtime.disk_read_rate) : '--'}{' '}
+                    ↑{realtime?.disk_write_rate != null ? formatDiskRate(realtime.disk_write_rate) : '--'}
+                  </span>
+                </div>
+              )}
+              {settings.display_items.cpu_freq && (
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[#9ca3af]">CPU频率</span>
+                  <span className="font-bold text-[#0ea5e9]">
+                    {realtime?.cpu_frequency != null ? `${(realtime.cpu_frequency / 1000).toFixed(2)}G` : '--'}
+                  </span>
+                </div>
+              )}
+              {settings.display_items.gpu_freq && (
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[#9ca3af]">GPU频率</span>
+                  <span className="font-bold text-[#10b981]">
+                    {realtime?.gpu_clock != null ? `${(realtime.gpu_clock / 1000).toFixed(2)}G` : '--'}
+                  </span>
+                </div>
+              )}
+              {settings.display_items.gpu_power && (
+                <div className="flex items-center gap-0.5">
+                  <span className="text-[#9ca3af]">GPU功耗</span>
+                  <span className="font-bold text-[#f59e0b]">
+                    {realtime?.gpu_power != null ? `${realtime.gpu_power.toFixed(0)}W` : '--'}
+                  </span>
                 </div>
               )}
             </div>
@@ -217,6 +269,24 @@ export function MonitorPage() {
             )}
             {settings.display_items.fps && (
               <span className="bg-yellow-500/20 text-yellow-400 font-medium rounded px-2.5 py-1 text-[11px]">FPS</span>
+            )}
+            {settings.display_items.fps_1pct && (
+              <span className="bg-yellow-500/20 text-yellow-400 font-medium rounded px-2.5 py-1 text-[11px]">1%Low</span>
+            )}
+            {settings.display_items.vram && (
+              <span className="bg-green-500/20 text-green-400 font-medium rounded px-2.5 py-1 text-[11px]">显存</span>
+            )}
+            {settings.display_items.disk && (
+              <span className="bg-blue-500/20 text-blue-400 font-medium rounded px-2.5 py-1 text-[11px]">磁盘</span>
+            )}
+            {settings.display_items.cpu_freq && (
+              <span className="bg-cyan-500/20 text-cyan-400 font-medium rounded px-2.5 py-1 text-[11px]">CPU频率</span>
+            )}
+            {settings.display_items.gpu_freq && (
+              <span className="bg-green-500/20 text-green-400 font-medium rounded px-2.5 py-1 text-[11px]">GPU频率</span>
+            )}
+            {settings.display_items.gpu_power && (
+              <span className="bg-orange-500/20 text-orange-400 font-medium rounded px-2.5 py-1 text-[11px]">GPU功耗</span>
             )}
           </div>
         </div>

@@ -244,6 +244,7 @@ fn overlay_window_size(position: &MonitorPosition, settings: &MonitorSettings) -
     let d = &settings.display_items;
     let n = [
         d.cpu, d.cpu_temp, d.gpu, d.gpu_temp, d.memory, d.network, d.fps,
+        d.fps_1pct, d.vram, d.disk, d.cpu_freq, d.gpu_freq, d.gpu_power,
     ]
     .iter()
     .filter(|v| **v)

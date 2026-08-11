@@ -222,10 +222,16 @@ class Program
                 case HardwareType.GpuNvidia:
                 case HardwareType.GpuAmd:
                 case HardwareType.GpuIntel:
+                    // 跳过热点传感器：Hot Spot / Junction 是芯片最热点，通常比核心温度高 10~15°C，
+                    // 任务管理器 / NVML 显示的是 GPU Core（核心温度），需与其对齐
                     if (sensor.Name.Contains("Hot Spot", StringComparison.OrdinalIgnoreCase) ||
-                        sensor.Name.Contains("Core", StringComparison.OrdinalIgnoreCase))
+                        sensor.Name.Contains("Junction", StringComparison.OrdinalIgnoreCase))
+                        break;
+                    // 优先 "Core"（核心温度，与任务管理器一致），
+                    // 无 Core 时取剩余温度最大值兜底（部分集显仅暴露单一温度传感器）
+                    if (sensor.Name.Contains("Core", StringComparison.OrdinalIgnoreCase))
                         gpuTemp = temp;
-                    else
+                    else if (gpuTemp is null)
                         gpuTemp = Math.Max(gpuTemp ?? double.MinValue, temp);
                     break;
                 case HardwareType.Motherboard:

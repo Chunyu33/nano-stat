@@ -8,7 +8,7 @@ import type { CSSProperties } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { RealtimeStats, MonitorSettings } from '../types/hardware';
-import { formatSpeed } from '../utils/format';
+import { formatSpeed, formatGb, formatDiskRate } from '../utils/format';
 
 /** 默认设置 */
 const defaultSettings: MonitorSettings = {
@@ -22,6 +22,12 @@ const defaultSettings: MonitorSettings = {
     memory: true,
     network: true,
     fps: false,
+    fps_1pct: true,
+    vram: true,
+    disk: true,
+    cpu_freq: false,
+    gpu_freq: false,
+    gpu_power: false,
   },
   refresh_interval: 1000,
   opacity: 80,
@@ -128,12 +134,13 @@ export function OverlayPanel() {
         </div>
       )}
 
-      {/* 内存使用率 */}
+      {/* 内存使用率 + 已用容量（GB） */}
       {settings.display_items.memory && (
         <div className="monitor-item">
           <span className="monitor-label">内存</span>
           <span className="monitor-value text-memory">
-            {stats?.memory_usage.toFixed(0) ?? '--'}%
+            {stats?.memory_usage.toFixed(0) ?? '--'}%{' '}
+            {stats ? `${formatGb(stats.memory_used)}/${formatGb(stats.memory_total)}` : ''}
           </span>
         </div>
       )}
@@ -154,6 +161,69 @@ export function OverlayPanel() {
           <span className="monitor-label">FPS</span>
           <span className="monitor-value text-fps">
             {stats?.fps != null ? stats.fps.toFixed(0) : '--'}
+          </span>
+        </div>
+      )}
+
+      {/* 1% Low FPS（帧时间 99 百分位换算；仅游戏前台且有足够帧数时有效） */}
+      {settings.display_items.fps_1pct && (
+        <div className="monitor-item">
+          <span className="monitor-label">1%Low</span>
+          <span className="monitor-value text-fps">
+            {stats?.fps_1pct != null ? stats.fps_1pct.toFixed(0) : '--'}
+          </span>
+        </div>
+      )}
+
+      {/* 显存占用（已用/总量） */}
+      {settings.display_items.vram && (
+        <div className="monitor-item">
+          <span className="monitor-label">显存</span>
+          <span className="monitor-value text-gpu">
+            {stats?.vram_used != null && stats?.vram_total != null
+              ? `${formatGb(stats.vram_used)}/${formatGb(stats.vram_total)}`
+              : '--'}
+          </span>
+        </div>
+      )}
+
+      {/* 磁盘读写速率（紧凑单位，如 ↓12.3M ↑2.1M 表示 MB/s） */}
+      {settings.display_items.disk && (
+        <div className="monitor-item">
+          <span className="monitor-label">磁盘</span>
+          <span className="monitor-value text-network">
+            ↓{stats?.disk_read_rate != null ? formatDiskRate(stats.disk_read_rate) : '--'}{' '}
+            ↑{stats?.disk_write_rate != null ? formatDiskRate(stats.disk_write_rate) : '--'}
+          </span>
+        </div>
+      )}
+
+      {/* CPU 当前频率 */}
+      {settings.display_items.cpu_freq && (
+        <div className="monitor-item">
+          <span className="monitor-label">CPU频率</span>
+          <span className="monitor-value text-cpu">
+            {stats?.cpu_frequency != null ? `${(stats.cpu_frequency / 1000).toFixed(2)}G` : '--'}
+          </span>
+        </div>
+      )}
+
+      {/* GPU 核心频率 */}
+      {settings.display_items.gpu_freq && (
+        <div className="monitor-item">
+          <span className="monitor-label">GPU频率</span>
+          <span className="monitor-value text-gpu">
+            {stats?.gpu_clock != null ? `${(stats.gpu_clock / 1000).toFixed(2)}G` : '--'}
+          </span>
+        </div>
+      )}
+
+      {/* GPU 功耗 */}
+      {settings.display_items.gpu_power && (
+        <div className="monitor-item">
+          <span className="monitor-label">GPU功耗</span>
+          <span className="monitor-value text-temp">
+            {stats?.gpu_power != null ? `${stats.gpu_power.toFixed(0)}W` : '--'}
           </span>
         </div>
       )}

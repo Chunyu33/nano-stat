@@ -143,18 +143,40 @@ export interface RealtimeStats {
   cpu_usage: number;
   /** CPU 温度 */
   cpu_temp: number | null;
+  /** CPU 当前频率 (MHz) */
+  cpu_frequency: number | null;
   /** GPU 使用率 (0-100) */
   gpu_usage: number;
   /** GPU 温度 */
   gpu_temp: number | null;
+  /** GPU 核心频率 (MHz) */
+  gpu_clock: number | null;
+  /** GPU 功耗 (W) */
+  gpu_power: number | null;
+  /** 显存已用 (MB) */
+  vram_used: number | null;
+  /** 显存总量 (MB) */
+  vram_total: number | null;
   /** 内存使用率 (0-100) */
   memory_usage: number;
+  /** 内存已用 (MB) */
+  memory_used: number;
+  /** 内存总量 (MB) */
+  memory_total: number;
   /** 网络统计 */
   network_stats: NetworkStats;
+  /** 磁盘读速率 (MB/s) */
+  disk_read_rate: number | null;
+  /** 磁盘写速率 (MB/s) */
+  disk_write_rate: number | null;
   /** 前台是否检测到游戏（全屏窗口） */
   is_game_active: boolean;
   /** 游戏帧率 (FPS，ETW 采集；非游戏或无权限时为 null) */
   fps: number | null;
+  /** 1% Low FPS（帧时间 99 百分位换算；仅游戏前台且有足够帧数时有效） */
+  fps_1pct: number | null;
+  /** 平均帧时间 (ms) */
+  frame_time: number | null;
   /** 时间戳 */
   timestamp: number;
 }
@@ -186,6 +208,18 @@ export interface DisplayItems {
   network: boolean;
   /** 显示帧率 */
   fps: boolean;
+  /** 显示 1% Low FPS */
+  fps_1pct: boolean;
+  /** 显示显存占用 */
+  vram: boolean;
+  /** 显示磁盘读写速率 */
+  disk: boolean;
+  /** 显示 CPU 频率 */
+  cpu_freq: boolean;
+  /** 显示 GPU 频率 */
+  gpu_freq: boolean;
+  /** 显示 GPU 功耗 */
+  gpu_power: boolean;
 }
 
 /** 监控设置 */

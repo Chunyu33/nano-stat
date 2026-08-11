@@ -60,17 +60,37 @@ pub fn get_realtime_stats() -> RealtimeStats {
     let is_game_active = game::is_game_active();
     fps::set_target_pid(game::get_foreground_pid());
     fps::settle_fps();
-    
+
+    // GPU 实时补充指标（NVML：显存/频率/功耗）
+    let (vram_used, vram_total, gpu_clock, gpu_power) = gpu::get_gpu_extra();
+
+    // 磁盘读写速率（MB/s）
+    let disk_rates = disk::get_disk_rates();
+
+    let memory_info = memory::get_memory_info(&sys);
+
     RealtimeStats {
         cpu_usage: cpu::get_cpu_usage(&sys),
         cpu_temp: cpu::get_cpu_temperature(&sys),
+        cpu_frequency: cpu::get_cpu_frequency(&sys),
         gpu_usage: gpu::get_gpu_usage(),
         gpu_temp: gpu::get_gpu_temperature(),
+        gpu_clock,
+        gpu_power,
+        vram_used,
+        vram_total,
         memory_usage: memory::get_memory_usage(&sys),
+        memory_used: memory_info.used,
+        memory_total: memory_info.total,
         network_stats: network::get_network_stats(&sys),
+        disk_read_rate: disk_rates.map(|(r, _)| r),
+        disk_write_rate: disk_rates.map(|(_, w)| w),
         is_game_active,
         // 始终返回 FPS（非游戏时是桌面整体帧率），前端全程显示
         fps: fps::get_fps(),
+        // 1% Low / 帧时间：仅游戏前台且帧数足够时有效，否则 None（前端显示 --）
+        fps_1pct: fps::get_fps_1pct(),
+        frame_time: fps::get_frame_time(),
         timestamp: chrono::Utc::now().timestamp_millis(),
     }
 }

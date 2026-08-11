@@ -60,6 +60,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **lhm-bridge resource missing on fresh checkout** — `bundle.resources` references the
+  NativeAOT `lhm-bridge.exe`, whose `bin/` output is git-ignored, so `tauri dev/build` failed
+  with "resource path doesn't exist" on a new clone. `beforeDevCommand` / `beforeBuildCommand`
+  now run `npm run bridge:publish` first (incremental, ~5 s) to build the bridge automatically
+  (adds a .NET SDK 8 requirement).
 - **Monitor info was hardcoded** — the hardware overview page showed a hardcoded `1920×1080 / 165Hz`
   regardless of the actual monitor. Display info is now queried live via Win32
   `EnumDisplaySettingsW(ENUM_CURRENT_SETTINGS)` (new `display.rs`), so resolution and refresh rate

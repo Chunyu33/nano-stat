@@ -4,9 +4,9 @@
   "version": "1.1.0",
   "identifier": "com.nanostat.app",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "npm run bridge:publish && npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run bridge:publish && npm run build",
     "frontendDist": "../dist"
   },
   "app": {

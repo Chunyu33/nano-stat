@@ -33,7 +33,7 @@
 
 ## 快速开始
 
-环境要求：Windows 10/11、Node.js 18+、Rust 1.70+。
+环境要求：Windows 10/11、Node.js 18+、Rust 1.70+、.NET SDK 8（编译 lhm-bridge 温度采集桥，NativeAOT）。
 
 ```bash
 # 安装依赖

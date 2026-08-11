@@ -34,7 +34,8 @@ A lightweight, modern desktop hardware monitoring tool for Windows — real-time
 
 ## Getting Started
 
-Prerequisites: Windows 10/11, Node.js 18+, Rust 1.70+.
+Prerequisites: Windows 10/11, Node.js 18+, Rust 1.70+, .NET SDK 8 (builds the lhm-bridge
+temperature sidecar via NativeAOT; `npm run tauri dev/build` publishes it automatically).
 
 ```bash
 # Install dependencies

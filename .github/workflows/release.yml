@@ -64,6 +64,21 @@ jobs:
       - name: 安装前端依赖
         run: npm ci
 
+      # 生成简洁的 Release 说明：提取 CHANGELOG.md 最新版本的节标题 + 各条 bullet 首行
+      - name: 生成 Release 说明（提取 CHANGELOG 最新版本）
+        id: release_body
+        shell: bash
+        run: |
+          BODY=$(awk '/^## /{if (found) exit; if ($0 ~ /^## \[?[0-9]/) found=1; next} found && /^### /{print; next} found && /^- /{print}' CHANGELOG.md | head -12)
+          {
+            echo "body<<EOF"
+            printf '%s\n' "$BODY"
+            printf '%s\n' ""
+            printf '%s\n' "---"
+            printf '%s\n' "**下载**：安装包 \`NanoStat_<version>_x64-setup.exe\` / 便携包 \`NanoStat_<version>_x64-portable.zip\` / WebView2 捆绑包 \`NanoStat_<version>_x64-webview2-setup.exe\`（均带 \`.sig\` 签名校验）"
+            printf '%s\n' "完整更新内容见 CHANGELOG.md"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: 构建安装包并创建 Release（自动签名 + 生成 latest.json）
         uses: tauri-apps/tauri-action@v0
@@ -72,14 +87,7 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'NanoStat v__VERSION__'
-          releaseBody: |
-            ## NanoStat v__VERSION__
-
-            请先确认草稿内容无误后发布（Release 为 draft 状态）。
-
-            **安装包**：`NanoStat_<version>_x64-setup.exe`（含 .sig 签名文件）
-            **便携包**：`NanoStat_<version>_x64-portable.zip`（含 .sig 签名文件，免安装，不支持自动更新）
-            **WebView2 捆绑包**：`NanoStat_<version>_x64-webview2-setup.exe`（内置 WebView2 运行时，适合无网环境）
+          releaseBody: ${{ steps.release_body.outputs.body }}
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true

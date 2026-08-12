@@ -4,23 +4,18 @@
  */
 
 import { useState } from 'react';
-import { Minus, Square, X, Settings, RefreshCw, Package } from 'lucide-react';
+import { Minus, Square, X, Settings } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { UpdateButton } from './UpdateButton';
 
 interface TitleBarProps {
   /** 打开设置弹窗的回调 */
   onOpenSettings: () => void;
   /** 当前页面标题 */
   title: string;
-  /** 手动检查更新回调 */
-  onCheckUpdates?: () => void;
-  /** 检查中状态 */
-  checking?: boolean;
-  /** 是否便携版（禁用检查更新） */
-  portable?: boolean;
 }
 
-export function TitleBar({ onOpenSettings, title, onCheckUpdates, checking, portable }: TitleBarProps) {
+export function TitleBar({ onOpenSettings, title }: TitleBarProps) {
   const [isMaximized, setIsMaximized] = useState(false);
 
   // 最小化窗口
@@ -85,23 +80,8 @@ export function TitleBar({ onOpenSettings, title, onCheckUpdates, checking, port
 
       {/* 右侧按钮 */}
       <div className="flex items-center gap-0 h-full no-drag">
-        {/* 检查更新按钮（便携版禁用） */}
-        {onCheckUpdates && (
-          <button
-            onClick={onCheckUpdates}
-            disabled={checking || portable}
-            className="w-10 h-full flex items-center justify-center text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-input)] hover:text-[var(--color-text-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
-            title={portable ? '便携版不支持在线更新，请从 GitHub Releases 手动下载' : '检查更新'}
-          >
-            {checking ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : portable ? (
-              <Package className="w-4 h-4" />
-            ) : (
-              <RefreshCw className="w-4 h-4" />
-            )}
-          </button>
-        )}
+        {/* 检查更新按钮（自包含组件：点击检查更新 / 便携版弹下载渠道；自动检查由 App 静默实例负责） */}
+        <UpdateButton variant="icon" autoCheck={false} />
 
         {/* 设置按钮 */}
         <button

@@ -4,11 +4,10 @@
  */
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { TitleBar } from './components/TitleBar';
 import { Sidebar, type NavItem } from './components/Sidebar';
 import { SettingsDialog } from './components/SettingsDialog';
-import { UpdateDialog, useUpdateChecker } from './components/UpdateDialog';
+import { UpdateButton } from './components/UpdateButton';
 import { HomePage } from './pages/HomePage';
 import { MonitorPage } from './pages/MonitorPage';
 import { AboutPage } from './pages/AboutPage';
@@ -31,33 +30,6 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // 监控设置
   const { settings, saveSettings } = useMonitorSettings();
-  // 更新检查
-  const {
-    updateInfo,
-    showDialog: showUpdateDialog,
-    setShowDialog: setShowUpdateDialog,
-    checkForUpdates,
-    checking,
-    installing,
-    installUpdate,
-    isPortableMode,
-  } = useUpdateChecker();
-  // 手动检查结果提示（无更新时轻提示）
-  const [updateToast, setUpdateToast] = useState<string | null>(null);
-
-  // 手动检查更新（无更新/失败时给出轻提示）
-  const handleCheckUpdates = async () => {
-    try {
-      const found = await checkForUpdates();
-      if (!found) {
-        setUpdateToast('已是最新版本 ✓');
-        window.setTimeout(() => setUpdateToast(null), 2500);
-      }
-    } catch {
-      setUpdateToast('检查更新失败，请稍后再试');
-      window.setTimeout(() => setUpdateToast(null), 2500);
-    }
-  };
 
   // 根据导航项渲染对应页面
   const renderPage = () => {
@@ -76,13 +48,10 @@ function App() {
   return (
     <ThemeProvider>
     <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--color-bg-main)' }}>
-      {/* 自定义标题栏 */}
+      {/* 自定义标题栏（检查更新按钮为独立组件，自动检查逻辑在组件内） */}
       <TitleBar
         title={pageTitles[activeNav]}
         onOpenSettings={() => setSettingsOpen(true)}
-        onCheckUpdates={handleCheckUpdates}
-        checking={checking}
-        portable={isPortableMode}
       />
 
       {/* 主内容区域 */}
@@ -109,31 +78,8 @@ function App() {
         onSave={saveSettings}
       />
 
-      {/* 更新弹窗 */}
-      <UpdateDialog
-        open={showUpdateDialog}
-        onOpenChange={setShowUpdateDialog}
-        updateInfo={updateInfo}
-        portable={isPortableMode}
-        onInstall={installUpdate}
-        installing={installing}
-      />
-
-      {/* 手动检查更新轻提示 */}
-      <AnimatePresence>
-        {updateToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.15 }}
-            className="fixed top-16 right-6 z-[100] px-4 py-2.5 rounded-lg text-xs font-medium shadow-lg"
-            style={{ backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)' }}
-          >
-            {updateToast}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* 静默更新检查：标题栏已有手动检查按钮，此处仅负责启动后自动检查（有更新才弹窗） */}
+      <UpdateButton variant="silent" autoCheck />
     </div>
     </ThemeProvider>
   );

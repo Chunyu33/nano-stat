@@ -397,7 +397,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
                     onClick={() => onOpenChange(false)}
                     className="px-5 py-2.5 text-[13px] font-medium text-[var(--color-text-secondary)] bg-transparent border border-[var(--color-border)] rounded-lg cursor-pointer transition-all hover:text-[var(--color-text-primary)]"
                   >
-                    取消
+                    关闭
                   </button>
                   <button
                     onClick={handleSave}

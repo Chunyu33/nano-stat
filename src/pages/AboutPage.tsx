@@ -58,7 +58,7 @@ export function AboutPage() {
             </div>
             <div className="rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] px-3 py-2.5">
               <p className="text-[11px] text-[var(--color-text-muted)]">最近更新</p>
-              <p className="mt-1 text-[13px] font-semibold text-[var(--color-text-primary)]">2026-08-08</p>
+              <p className="mt-1 text-[13px] font-semibold text-[var(--color-text-primary)]">2026-08-11</p>
             </div>
             <div className="rounded-lg bg-[var(--color-bg-input)] border border-[var(--color-border)] px-3 py-2.5">
               <p className="text-[11px] text-[var(--color-text-muted)]">许可证</p>

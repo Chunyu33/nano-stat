@@ -59,10 +59,10 @@ export function GpuCard({ gpu, usageHistory }: GpuCardProps) {
 
       {/* 主要信息区域 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-        {/* D3D 占用 */}
+        {/* 显卡占用 */}
         <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>D3D 占用</span>
+            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>显卡占用</span>
             <span className="text-xl font-bold text-green-400">
               {gpu.usage.toFixed(0)}%
             </span>
@@ -75,18 +75,18 @@ export function GpuCard({ gpu, usageHistory }: GpuCardProps) {
           </div>
         </div>
 
-        {/* Total 占用 */}
+        {/* 显存占用 */}
         <div className="bg-[var(--color-bg-input)] rounded-lg" style={{ padding: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Total 占用</span>
+            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>显存占用</span>
             <span className="text-xl font-bold text-green-400">
-              {gpu.usage.toFixed(0)}%
+              {vramUsagePercent.toFixed(0)}%
             </span>
           </div>
           <div className="h-1.5 bg-[var(--color-border)] rounded-full overflow-hidden">
             <div
               className="h-full bg-green-500 rounded-full transition-all duration-300"
-              style={{ width: `${gpu.usage}%` }}
+              style={{ width: `${vramUsagePercent}%` }}
             />
           </div>
         </div>

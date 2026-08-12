@@ -29,3 +29,5 @@ src-tauri/lhm-bridge/obj/
 *.sln
 *.sw?
 /temp
+# Hermes 终端临时目录（MSVC 链接器 tmp 环境变量指向）
+.hermes-tmp/

@@ -186,3 +186,41 @@ pub fn get_gpu_temperature() -> Option<f32> {
         .ok()
         .map(|t| t as f32)
 }
+
+/// GPU 实时补充指标（一次 NVML 查询拿全，减少锁竞争）
+///
+/// 返回 (显存已用 MB, 显存总量 MB, 核心频率 MHz, 功耗 W)；
+/// NVML 不可用（AMD/Intel/无驱动）时全部为 None，前端显示 --。
+pub fn get_gpu_extra() -> (Option<u64>, Option<u64>, Option<u32>, Option<f32>) {
+    let nvml_guard = match NVML.lock() {
+        Ok(guard) => guard,
+        Err(_) => return (None, None, None, None),
+    };
+
+    let nvml = match nvml_guard.as_ref() {
+        Some(nvml) => nvml,
+        None => return (None, None, None, None),
+    };
+
+    let device = match nvml.device_by_index(0) {
+        Ok(device) => device,
+        Err(_) => return (None, None, None, None),
+    };
+
+    // 显存（MB）
+    let (vram_used, vram_total) = device.memory_info().ok().map(|m| {
+        (m.used / (1024 * 1024), m.total / (1024 * 1024))
+    }).unwrap_or((0, 0));
+    let vram_used = (vram_used > 0).then_some(vram_used);
+    let vram_total = (vram_total > 0).then_some(vram_total);
+
+    // 核心频率（MHz）
+    let clock = device
+        .clock_info(nvml_wrapper::enum_wrappers::device::Clock::Graphics)
+        .ok();
+
+    // 功耗（mW → W）
+    let power = device.power_usage().ok().map(|p| p as f32 / 1000.0);
+
+    (vram_used, vram_total, clock, power)
+}

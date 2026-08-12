@@ -287,6 +287,12 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
                         { key: 'memory' as const, label: '内存使用率' },
                         { key: 'network' as const, label: '网络速率' },
                         { key: 'fps' as const, label: '帧率 (FPS)' },
+                        { key: 'fps_1pct' as const, label: '1% Low 帧率' },
+                        { key: 'vram' as const, label: '显存占用' },
+                        { key: 'disk' as const, label: '磁盘读写' },
+                        { key: 'cpu_freq' as const, label: 'CPU 频率' },
+                        { key: 'gpu_freq' as const, label: 'GPU 频率' },
+                        { key: 'gpu_power' as const, label: 'GPU 功耗' },
                       ].map(item => (
                         <div
                           key={item.key}
@@ -391,7 +397,7 @@ export function SettingsDialog({ open, onOpenChange, settings, onSave }: Setting
                     onClick={() => onOpenChange(false)}
                     className="px-5 py-2.5 text-[13px] font-medium text-[var(--color-text-secondary)] bg-transparent border border-[var(--color-border)] rounded-lg cursor-pointer transition-all hover:text-[var(--color-text-primary)]"
                   >
-                    取消
+                    关闭
                   </button>
                   <button
                     onClick={handleSave}

@@ -1,6 +1,6 @@
 [package]
 name = "nanostat"
-version = "1.1.0"
+version = "1.2.0"
 description = "NanoStat - lightweight hardware monitor with in-game overlay"
 authors = ["Evan Lau"]
 edition = "2021"
@@ -45,6 +45,7 @@ windows-sys = { version = "0.59", features = [
 windows = { version = "0.59", features = [
     "Win32_Foundation",
     "Win32_System_Diagnostics_Etw",
+    "Win32_System_Performance",
     "Win32_System_Time",
 ] }
 # 时间处理

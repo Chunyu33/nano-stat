@@ -7,9 +7,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Sparkles, Package } from 'lucide-react';
+import { X, Download, Sparkles, Package, Github, Cloud } from 'lucide-react';
 import { check, type Update } from '@tauri-apps/plugin-updater';
 import { isPortable } from '../api/hardware';
+
+/// 便携版手动下载渠道（点击更新按钮时弹出选择）
+const GITHUB_RELEASES_URL = 'https://github.com/Chunyu33/nano-stat/releases';
+const PAN_DOWNLOAD_URL = 'https://pan.quark.cn/s/04633ebe7107';
 
 interface UpdateInfo {
   version: string;
@@ -48,7 +52,8 @@ const contentMotion = {
 };
 
 export function UpdateDialog({ open, onOpenChange, updateInfo, portable, onInstall, installing }: UpdateDialogProps) {
-  if (!updateInfo) return null;
+  // 便携版渠道弹窗不依赖更新信息（无 updateInfo 也可渲染）
+  if (!updateInfo && !portable) return null;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -70,10 +75,14 @@ export function UpdateDialog({ open, onOpenChange, updateInfo, portable, onInsta
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-sidebar)]">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-green-400" />
+                      {portable ? (
+                        <Package className="w-4 h-4 text-cyan-400" />
+                      ) : (
+                        <Sparkles className="w-4 h-4 text-green-400" />
+                      )}
                     </div>
                     <Dialog.Title className="text-base font-semibold text-[var(--color-text-primary)]">
-                      发现新版本
+                      {portable ? '检查更新' : '发现新版本'}
                     </Dialog.Title>
                   </div>
                   <Dialog.Close asChild>
@@ -83,13 +92,59 @@ export function UpdateDialog({ open, onOpenChange, updateInfo, portable, onInsta
                   </Dialog.Close>
                 </div>
 
-                {/* 内容 */}
+                {/* 内容：便携版显示手动下载渠道，安装版显示版本信息 */}
+                {portable ? (
+                  <div className="p-5">
+                    {/* 说明 */}
+                    <div className="flex items-start gap-3 p-4 rounded-lg border bg-[var(--color-bg-input)] border-[var(--color-border)]">
+                      <Package className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)]">便携版暂不支持在线更新</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--color-text-muted)]">
+                          请从以下渠道手动下载最新版本，解压后替换即可。
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 下载渠道 */}
+                    <div className="grid gap-2.5 mt-4">
+                      <a
+                        href={GITHUB_RELEASES_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center gap-3 p-3.5 rounded-lg border bg-[var(--color-bg-input)] border-[var(--color-border)] no-underline transition-all hover:border-emerald-500/40 hover:bg-emerald-500/5"
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-gray-500/15 flex items-center justify-center flex-shrink-0">
+                          <Github className="w-4.5 h-4.5 text-[var(--color-text-secondary)] group-hover:text-emerald-400 transition-colors" />
+                        </div>
+                        <span className="min-w-0">
+                          <span className="block text-[13px] font-medium text-[var(--color-text-primary)]">GitHub Releases</span>
+                          <span className="block mt-0.5 text-[11px] text-[var(--color-text-muted)]">官方发布页 · 安装包与便携包均在此</span>
+                        </span>
+                      </a>
+                      <a
+                        href={PAN_DOWNLOAD_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center gap-3 p-3.5 rounded-lg border bg-[var(--color-bg-input)] border-[var(--color-border)] no-underline transition-all hover:border-emerald-500/40 hover:bg-emerald-500/5"
+                      >
+                        <div className="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+                          <Cloud className="w-4.5 h-4.5 text-blue-400 group-hover:text-emerald-400 transition-colors" />
+                        </div>
+                        <span className="min-w-0">
+                          <span className="block text-[13px] font-medium text-[var(--color-text-primary)]">夸克网盘</span>
+                          <span className="block mt-0.5 text-[11px] text-[var(--color-text-muted)]">国内用户备用渠道 · 免登录下载</span>
+                        </span>
+                      </a>
+                    </div>
+                  </div>
+                ) : (
                 <div className="p-5">
                   {/* 版本信息 */}
                   <div className="flex items-center justify-between mb-4 p-4 rounded-lg border bg-[var(--color-bg-input)] border-[var(--color-border)]">
                     <div>
                       <p className="mb-1 text-xs text-[var(--color-text-muted)]">新版本</p>
-                      <p className="text-lg font-bold text-green-400">v{updateInfo.version}</p>
+                      <p className="text-lg font-bold text-green-400">v{updateInfo?.version}</p>
                     </div>
                     <div className="text-right">
                       <p className="mb-1 text-xs text-[var(--color-text-muted)]">当前版本</p>
@@ -102,7 +157,7 @@ export function UpdateDialog({ open, onOpenChange, updateInfo, portable, onInsta
                     <p className="mb-2 text-sm font-medium text-[var(--color-text-primary)]">更新内容</p>
                     <div className="p-3 rounded-lg border max-h-32 overflow-y-auto bg-[var(--color-bg-input)] border-[var(--color-border)]">
                       <p className="whitespace-pre-wrap leading-relaxed text-xs text-[var(--color-text-secondary)]">
-                        {updateInfo.releaseNotes || '- 性能优化和 Bug 修复'}
+                        {updateInfo?.releaseNotes || '- 性能优化和 Bug 修复'}
                       </p>
                     </div>
                   </div>
@@ -114,8 +169,9 @@ export function UpdateDialog({ open, onOpenChange, updateInfo, portable, onInsta
                     </p>
                   </div>
                 </div>
+                )}
 
-                {/* 底部按钮 */}
+                {/* 底部按钮（便携版渠道已在内容区，仅保留关闭） */}
                 <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-[var(--color-border)] bg-[var(--color-bg-sidebar)]">
                   <button
                     onClick={() => onOpenChange(false)}
@@ -123,25 +179,7 @@ export function UpdateDialog({ open, onOpenChange, updateInfo, portable, onInsta
                   >
                     稍后提醒
                   </button>
-                  {portable ? (
-                    <button
-                      onClick={onInstall}
-                      disabled={installing}
-                      className="flex items-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/50 text-white rounded-lg transition-colors px-5 py-2.5 text-xs font-semibold"
-                    >
-                      {installing ? (
-                        <>
-                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>跳转中...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Package className="w-3.5 h-3.5" />
-                          <span>前往下载页</span>
-                        </>
-                      )}
-                    </button>
-                  ) : (
+                  {!portable && (
                     <button
                       onClick={onInstall}
                       disabled={installing}
@@ -172,12 +210,12 @@ export function UpdateDialog({ open, onOpenChange, updateInfo, portable, onInsta
 
 /**
  * 更新检查 Hook
- * - 自动检查：非便携版启动 3 秒后检查一次
- * - 手动检查：checkForUpdates()（返回是否发现新版本）
+ * - 自动检查：非便携版启动 3 秒后检查一次（autoCheck=true 时）
+ * - 手动检查：checkForUpdates()（便携版直接弹出下载渠道；安装版返回是否发现新版本）
  * - 安装：installUpdate()（下载并安装，安装器模式）
- * 便携版：跳过自动检查，安装时跳转 GitHub Releases 下载页
+ * 便携版：跳过自动检查，手动检查时弹出下载渠道（GitHub Releases / 夸克网盘）
  */
-export function useUpdateChecker() {
+export function useUpdateChecker(autoCheck = true) {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -187,7 +225,11 @@ export function useUpdateChecker() {
 
   // 执行检查（auto=true 为自动检查，失败静默；手动检查失败抛给调用方提示）
   const performCheck = useCallback(async (auto: boolean): Promise<boolean> => {
-    if (isPortableMode) return false;
+    if (isPortableMode) {
+      // 便携版：不查询远端，手动检查时直接弹出下载渠道弹窗
+      if (!auto) setShowDialog(true);
+      return false;
+    }
     setChecking(true);
     try {
       const update = await check();
@@ -207,8 +249,9 @@ export function useUpdateChecker() {
     }
   }, [isPortableMode]);
 
-  // 启动时检测便携版 + 自动检查（非便携版延迟 3 秒）
+  // 启动时检测便携版 + 自动检查（autoCheck=true 且非便携版延迟 3 秒）
   useEffect(() => {
+    if (!autoCheck) return;
     let cancelled = false;
     let timer: number | undefined;
     isPortable().then(p => {
@@ -224,16 +267,10 @@ export function useUpdateChecker() {
       cancelled = true;
       if (timer) window.clearTimeout(timer);
     };
-  }, [performCheck]);
+  }, [performCheck, autoCheck]);
 
-  // 安装更新（安装版：下载并安装；便携版：跳转 GitHub Releases 下载页）
+  // 安装更新（仅安装版：下载并安装；便携版由渠道弹窗处理）
   const installUpdate = useCallback(async (): Promise<void> => {
-    if (isPortableMode) {
-      // 便携版无内置更新，跳转 GitHub Releases 页面手动下载
-      window.open('https://github.com/Chunyu33/nano-stat/releases/latest', '_blank');
-      setShowDialog(false);
-      return;
-    }
     if (!updateRef.current) return;
     setInstalling(true);
     try {
@@ -244,7 +281,7 @@ export function useUpdateChecker() {
     } finally {
       setInstalling(false);
     }
-  }, [isPortableMode]);
+  }, []);
 
   return {
     updateInfo,

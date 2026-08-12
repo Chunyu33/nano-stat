@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-08-11
+
+### Added
+
+- **1% Low FPS** — the ETW frame monitor now records per-frame timestamps into a ring buffer and
+  computes the 99th-percentile frame time (the slowest 1% of frames), converted to FPS the same
+  way PresentMon does. Reported only while a foreground game is active (the desktop-fallback mode
+  shows `--`); requires the same administrator rights as FPS.
+- **GPU memory usage, core clock and power draw** — three new overlay items backed by NVML
+  real-time queries (NVIDIA only; other brands show `--`).
+- **CPU frequency** — real-time average across cores (MHz) as an overlay item.
+- **Disk read/write rates** — PDH `PhysicalDisk(_Total)` counters (English counter paths, immune
+  to localized Windows), shown in the overlay as compact `↓x.xM ↑x.xM` (MB/s). The query handle
+  is lazily initialized once and reused for the process lifetime (<1 ms per poll).
+- **Memory item upgraded** — the overlay now shows used/total RAM in GB alongside the percentage.
+- All new items are toggleable in the overlay settings (defaults: 1% Low / VRAM / disk on,
+  frequencies & power off); the overlay window size calculation covers the new items.
+
+### Fixed
+
+- **GPU temperature reported from the hot-spot sensor** — the LHM bridge picked the highest GPU
+  temperature sensor (`GPU Hot Spot`, typically 10–15 °C above the core), so the overlay always
+  showed 70+ °C while Task Manager reported ~59 °C. The bridge now skips hot-spot / junction
+  sensors and reports `GPU Core` — the same sensor Task Manager / NVML read.
+
 ## [1.1.0] - 2026-08-11
 
 ### Added
